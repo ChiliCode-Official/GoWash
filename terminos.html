@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Términos y Condiciones | GoWash</title>
+    
+    <!-- Favicon / PWA Icon -->
+    <link rel="icon" type="image/png" href="https://i.imgur.com/seIwnhu.png">
+    
+    <!-- Hojas de estilo -->
+    <link rel="stylesheet" href="style.css">
+    
+    <style>
+        .legal-card {
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 48px 40px;
+            animation: fade-in 0.5s ease-out;
+        }
+
+        @media (max-width: 600px) {
+            .legal-card {
+                padding: 24px 16px;
+                margin: 20px auto;
+            }
+            .legal-title {
+                font-size: 1.8rem;
+                margin-bottom: 16px;
+            }
+        }
+
+        .legal-title {
+            font-size: 2.5rem;
+            margin-bottom: 24px;
+            background: linear-gradient(135deg, var(--text-primary) 40%, var(--primary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-family: var(--font-title);
+        }
+
+        .legal-content {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            line-height: 1.8;
+            text-align: justify;
+        }
+
+        .legal-content h2 {
+            color: var(--text-primary);
+            font-size: 1.3rem;
+            margin-top: 32px;
+            margin-bottom: 12px;
+            font-family: var(--font-title);
+        }
+
+        .legal-content p {
+            margin-bottom: 16px;
+        }
+
+        .legal-content ul {
+            margin-left: 20px;
+            margin-bottom: 16px;
+            list-style-type: square;
+        }
+
+        .legal-content li {
+            margin-bottom: 8px;
+        }
+
+        .danger-highlight-box {
+            background: rgba(229, 62, 62, 0.05);
+            border-left: 3px solid var(--danger);
+            padding: 20px;
+            border-radius: 0 12px 12px 0;
+            margin: 24px 0;
+        }
+
+        .danger-highlight-box p {
+            margin-bottom: 0;
+            color: var(--text-primary);
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+        <!-- Header -->
+        <header class="navbar glass-panel">
+            <div class="brand">
+                <a href="index.html" style="display: flex; align-items: center; gap: 12px; text-decoration: none;">
+                    <img src="https://i.imgur.com/seIwnhu.png" alt="Logo" class="brand-logo" style="height: 36px;">
+                    <span class="brand-name">GoWash</span>
+                </a>
+            </div>
+            <a href="index.html" class="btn btn-secondary" style="padding: 8px 16px;">Volver</a>
+        </header>
+
+        <!-- Documento Legal -->
+        <div class="glass-panel legal-card">
+            <h1 class="legal-title">Términos y Condiciones</h1>
+            <div class="legal-content">
+                <p><strong>Última actualización:</strong> 5 de junio de 2026</p>
+                <p>Bienvenido a <strong>GoWash</strong>. El uso de nuestro sistema (boleto digital, terminal de autolavado y portal administrativo) se rige por los presentes Términos y Condiciones. Al utilizar nuestro software, usted acepta de manera irrevocable estas disposiciones.</p>
+                
+                <div class="danger-highlight-box">
+                    <p><strong>CLÁUSULA DE EXCLUSIÓN DE RESPONSABILIDAD (CRÍTICA):</strong><br>
+                    Chili Code actúa ÚNICAMENTE como proveedor de infraestructura de software (SaaS). Chili Code NO opera el servicio de Autolavado, NO conduce vehículos y NO asume NINGUNA responsabilidad civil, penal o financiera por robos, choques, siniestros, daños preexistentes, o pérdida de objetos de valor dentro de los vehículos. Cualquier reclamación debe dirigirse directamente a la empresa operadora del Autolavado o al establecimiento físico correspondiente.</p>
+                </div>
+
+                <h2>1. Naturaleza del Servicio</h2>
+                <p>GoWash es una plataforma digital tipo Software como Servicio (SaaS) diseñada para la gestión del control de servicios de lavado de vehículos. La aplicación facilita el registro de datos vehiculares, la generación de boletos electrónicos QR, la inspección fotográfica para constancia del estado físico del automóvil (Bóveda Legal) y la recaudación de pagos.</p>
+
+                <h2>2. Deslinde de Relación de Mandato</h2>
+                <p>El uso del sistema GoWash no crea ningún tipo de relación de mandato, subordinación, comisión mercantil o sociedad entre Chili Code y los operadores del lavado (lavadores), la empresa operadora de lavado, o el establecimiento final. Los operadores del autolavado son empleados o subcontratistas independientes del establecimiento comercial y actúan bajo su entera dirección.</p>
+
+                <h2>3. Limitación de Responsabilidad Tecnológica</h2>
+                <p>Chili Code provee la plataforma "tal cual está" y no garantiza que esté libre de interrupciones o fallos en zonas con baja conectividad celular. Sin embargo, proveemos herramientas de optimización interna para mitigar desconexiones. Bajo ninguna circunstancia Chili Code será responsable por lucro cesante, pérdidas comerciales, ni perjuicios derivados del mal uso del software o de un fallo de red externa.</p>
+
+                <h2>4. Modificaciones al Sistema</h2>
+                <p>Chili Code se reserva el derecho de actualizar, optimizar y modificar las interfaces del software para corregir fallos o añadir funcionalidades sin previo aviso, garantizando siempre mantener la seguridad de los expedientes almacenados en la base de datos de Firestore.</p>
+
+                <h2>5. Jurisdicción Aplicable</h2>
+                <p>Para la resolución de cualquier conflicto derivado de la interpretación de este contrato de licencia tecnológica, el usuario y Chili Code se someten a las leyes federales de los Estados Unidos Mexicanos y a los tribunales competentes de la Ciudad de Monterrey, Nuevo León, renunciando a cualquier otro fuero que pudiera corresponderles en razón de su domicilio presente o futuro.</p>
+            </div>
+        </div>
+        
+        <!-- Footer -->
+        <footer style="margin-top: 40px; padding: 24px 0; text-align: center; border-top: 1px solid var(--border-color); display: flex; flex-direction: column; gap: 8px; align-items: center;">
+            <p>© 2026 GoWash por Chili Code. Todos los derechos reservados.</p>
+            <div style="font-size: 0.75rem;">
+                <a href="terminos.html" style="color: var(--text-secondary); text-decoration: none; margin: 0 10px;">Términos de Uso</a> | 
+                <a href="privacidad.html" style="color: var(--text-secondary); text-decoration: none; margin: 0 10px;">Aviso de Privacidad</a>
+            </div>
+            <div style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 8px; display: inline-flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                <span>Una submarca de</span>
+                <a href="https://chilicode-official.github.io/ChiliCode/" target="_blank" style="display: inline-flex; align-items: center; gap: 6px; text-decoration: none; color: var(--text-primary); font-weight: 700;">
+                    <img src="https://i.imgur.com/h3CpChF.png" alt="Chili Code" style="height: 16px; object-fit: contain;">
+                    <span>Chili Code</span>
+                </a>
+            </div>
+        </footer>
+    </div>
+
+</body>
+</html>

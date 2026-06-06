@@ -1,0 +1,17 @@
+{
+  "name": "GoWash Autolavado",
+  "short_name": "GoWash",
+  "description": "Gestión Inteligente de Autolavados y Bóveda Legal por Chili Code",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#FFFFFF",
+  "theme_color": "#FF7F00",
+  "icons": [
+    {
+      "src": "https://i.imgur.com/seIwnhu.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

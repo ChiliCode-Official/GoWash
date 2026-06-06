@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aviso de Privacidad | GoWash</title>
+    
+    <!-- Favicon / PWA Icon -->
+    <link rel="icon" type="image/png" href="https://i.imgur.com/seIwnhu.png">
+    
+    <!-- Hojas de estilo -->
+    <link rel="stylesheet" href="style.css">
+    
+    <style>
+        .legal-card {
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 48px 40px;
+            animation: fade-in 0.5s ease-out;
+        }
+
+        @media (max-width: 600px) {
+            .legal-card {
+                padding: 24px 16px;
+                margin: 20px auto;
+            }
+            .legal-title {
+                font-size: 1.8rem;
+                margin-bottom: 16px;
+            }
+        }
+
+        .legal-title {
+            font-size: 2.5rem;
+            margin-bottom: 24px;
+            background: linear-gradient(135deg, var(--text-primary) 40%, var(--primary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-family: var(--font-title);
+        }
+
+        .legal-content {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            line-height: 1.8;
+            text-align: justify;
+        }
+
+        .legal-content h2 {
+            color: var(--text-primary);
+            font-size: 1.3rem;
+            margin-top: 32px;
+            margin-bottom: 12px;
+            font-family: var(--font-title);
+        }
+
+        .legal-content p {
+            margin-bottom: 16px;
+        }
+
+        .legal-content ul {
+            margin-left: 20px;
+            margin-bottom: 16px;
+            list-style-type: square;
+        }
+
+        .legal-content li {
+            margin-bottom: 8px;
+        }
+
+        .highlight-box {
+            background: rgba(255, 127, 0, 0.05);
+            border-left: 3px solid var(--primary);
+            padding: 16px;
+            border-radius: 0 12px 12px 0;
+            margin: 24px 0;
+        }
+
+        .highlight-box p {
+            margin-bottom: 0;
+            color: var(--text-primary);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+        <!-- Header -->
+        <header class="navbar glass-panel">
+            <div class="brand">
+                <a href="index.html" style="display: flex; align-items: center; gap: 12px; text-decoration: none;">
+                    <img src="https://i.imgur.com/seIwnhu.png" alt="Logo" class="brand-logo" style="height: 36px;">
+                    <span class="brand-name">GoWash</span>
+                </a>
+            </div>
+            <a href="index.html" class="btn btn-secondary" style="padding: 8px 16px;">Volver</a>
+        </header>
+
+        <!-- Documento Legal -->
+        <div class="glass-panel legal-card">
+            <h1 class="legal-title">Aviso de Privacidad</h1>
+            <div class="legal-content">
+                <p><strong>Última actualización:</strong> 5 de junio de 2026</p>
+                <p>En cumplimiento con la <strong>Ley Federal de Protección de Datos Personales en Posesión de los Particulares (LFPDPPP)</strong> de México, <strong>Chili Code</strong>, como desarrollador y proveedor de la plataforma de software <strong>GoWash</strong>, pone a su disposición el presente Aviso de Privacidad.</p>
+                
+                <div class="highlight-box">
+                    <p><strong>Declaración Clave:</strong> Chili Code recopila fotografías del vehículo y sus placas exclusivamente para motivos de seguridad, auditoría y prevención de fraudes del establecimiento (Autolavado). Los datos no se venden ni se usarán bajo ninguna circunstancia para fines de marketing.</p>
+                </div>
+
+                <h2>1. Responsable del Tratamiento de Datos</h2>
+                <p>El establecimiento comercial u operador de Autolavado que contrata la infraestructura de GoWash es el <strong>Responsable</strong> directo del tratamiento de sus datos personales. <strong>Chili Code</strong> actúa únicamente como <strong>Encargado</strong> en términos de la LFPDPPP, proveyendo la base de datos y la plataforma en la nube para el procesamiento de la información.</p>
+
+                <h2>2. Datos Personales que Recopilamos</h2>
+                <p>Para la correcta prestación del servicio de control digital de lavado e inspección, se recopilarán los siguientes datos a través de la terminal del autolavado:</p>
+                <ul>
+                    <li>Número de placa del vehículo.</li>
+                    <li>Fotografías de inspección externa del vehículo (Frente, Atrás, Lateral Izquierda, Lateral Derecha, Techo).</li>
+                    <li>Notas sobre el estado físico visible del automóvil al momento del ingreso.</li>
+                    <li>Marca, modelo y tipo de lavado seleccionado.</li>
+                </ul>
+
+                <h2>3. Finalidad del Tratamiento de Datos</h2>
+                <p>Los datos recopilados tienen las siguientes finalidades de carácter estrictamente operacional:</p>
+                <ul>
+                    <li>Emitir un boleto digital único escaneable mediante código QR.</li>
+                    <li>Construir una <strong>Bóveda Legal</strong> de inspección para acreditar las condiciones físicas de entrega del automóvil y prevenir reclamos fraudulentos por daños preexistentes.</li>
+                    <li>Verificar el estado del pago del boleto digital (procesado de forma segura vía Mercado Pago o Stripe).</li>
+                    <li>Permitir al dueño del establecimiento auditar el flujo de caja, insumos químicos e ingresos del día de manera interna.</li>
+                </ul>
+
+                <h2>4. Transferencia y Uso de Datos</h2>
+                <p>Chili Code garantiza la confidencialidad de la información. <strong>Ningún dato personal recopilado por GoWash es vendido, alquilado o transferido a terceros para campañas de marketing o publicidad.</strong> Las transferencias se limitan estrictamente a:</p>
+                <ul>
+                    <li>La pasarela de pagos (Mercado Pago / Stripe) para procesar los cargos digitales de tarifa del lavado solicitados por el cliente.</li>
+                    <li>Autoridades competentes en caso de que sea requerido por mandato judicial o para la investigación de siniestros dentro de las instalaciones.</li>
+                </ul>
+
+                <h2>5. Derechos ARCO</h2>
+                <p>Usted tiene derecho al Acceso, Rectificación, Cancelación y Oposición (Derechos ARCO) de sus datos personales. Para ejercer estos derechos, deberá contactar directamente a la administración del establecimiento responsable del servicio de Autolavado donde se emitió el boleto, o enviar un correo de soporte a la administración proveedora.</p>
+            </div>
+        </div>
+        
+        <!-- Footer -->
+        <footer style="margin-top: 40px; padding: 24px 0; text-align: center; border-top: 1px solid var(--border-color); display: flex; flex-direction: column; gap: 8px; align-items: center;">
+            <p>© 2026 GoWash por Chili Code. Todos los derechos reservados.</p>
+            <div style="font-size: 0.75rem;">
+                <a href="terminos.html" style="color: var(--text-secondary); text-decoration: none; margin: 0 10px;">Términos de Uso</a> | 
+                <a href="privacidad.html" style="color: var(--text-secondary); text-decoration: none; margin: 0 10px;">Aviso de Privacidad</a>
+            </div>
+            <div style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 8px; display: inline-flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                <span>Una submarca de</span>
+                <a href="https://chilicode-official.github.io/ChiliCode/" target="_blank" style="display: inline-flex; align-items: center; gap: 6px; text-decoration: none; color: var(--text-primary); font-weight: 700;">
+                    <img src="https://i.imgur.com/h3CpChF.png" alt="Chili Code" style="height: 16px; object-fit: contain;">
+                    <span>Chili Code</span>
+                </a>
+            </div>
+        </footer>
+    </div>
+
+</body>
+</html>

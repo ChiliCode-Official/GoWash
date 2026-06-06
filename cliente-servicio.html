@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tu Boleto Digital | GoWash</title>
+    
+    <!-- Favicon / PWA Icon -->
+    <link rel="icon" type="image/png" href="https://i.imgur.com/seIwnhu.png">
+    
+    <!-- Hojas de estilo -->
+    <link rel="stylesheet" href="style.css">
+    
+    <!-- Stripe.js SDK -->
+    <script src="https://js.stripe.com/v3/"></script>
+
+    <style>
+        .ticket-view-card {
+            padding: 32px 24px;
+            text-align: center;
+            margin-top: 20px;
+            animation: card-slide-up 0.5s ease-out;
+        }
+
+        @keyframes card-slide-up {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .plate-header {
+            font-size: clamp(1.6rem, 8vw, 2.2rem);
+            font-family: var(--font-title);
+            font-weight: 800;
+            letter-spacing: 0.05em;
+            color: var(--primary);
+            margin-bottom: 8px;
+            border-bottom: 2px dashed var(--border-color);
+            padding-bottom: 12px;
+            display: inline-block;
+            width: 100%;
+        }
+
+        /* Cronómetro */
+        .timer-container {
+            margin: 24px 0;
+            padding: 16px;
+            background: rgba(0, 0, 0, 0.02);
+            border-radius: 16px;
+            border: 1px solid var(--border-color);
+        }
+
+        .timer-display {
+            font-family: var(--font-title);
+            font-size: clamp(2rem, 10vw, 2.8rem);
+            font-weight: 800;
+            letter-spacing: 0.05em;
+            color: var(--text-primary);
+            line-height: 1;
+            margin-bottom: 6px;
+        }
+
+        .timer-label {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .price-display {
+            font-family: var(--font-title);
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--primary);
+            margin: 16px 0;
+        }
+
+        /* Carrusel de fotos */
+        .carousel-container {
+            margin: 24px 0;
+            position: relative;
+            border-radius: 16px;
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+            aspect-ratio: 1.5;
+            background: rgba(0,0,0,0.03);
+        }
+
+        .carousel-slides {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            transition: transform 0.3s ease-in-out;
+        }
+
+        .carousel-slide {
+            min-width: 100%;
+            height: 100%;
+            position: relative;
+        }
+
+        .carousel-slide img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .carousel-slide-label {
+            position: absolute;
+            bottom: 12px;
+            left: 12px;
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(4px);
+            padding: 4px 12px;
+            border-radius: 8px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+        }
+
+        .carousel-btn {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            font-size: 1.2rem;
+            width: 44px;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            border-radius: 50%;
+            transition: var(--transition-smooth);
+            z-index: 10;
+            touch-action: manipulation;
+        }
+
+        @media (hover: hover) {
+            .carousel-btn:hover {
+                background: var(--primary);
+                color: white;
+                border-color: var(--primary);
+            }
+        }
+
+        .carousel-btn:active {
+            transform: translateY(-50%) scale(0.9);
+            background: var(--primary-bg);
+            color: var(--primary);
+        }
+
+        .carousel-btn-prev { left: 12px; }
+        .carousel-btn-next { right: 12px; }
+
+        /* Estado del Vehículo */
+        .vehicle-status-banner {
+            padding: 12px;
+            border-radius: 12px;
+            font-weight: 700;
+            margin-bottom: 24px;
+            font-size: 0.95rem;
+            text-transform: uppercase;
+            text-align: center;
+        }
+
+        /* Acciones */
+        .actions-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        /* Spinner */
+        .spinner-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(255, 255, 255, 0.85);
+            z-index: 3000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid rgba(0,0,0,0.05);
+            border-top: 5px solid var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Bento Grid */
+        .bento-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+            margin-top: 20px;
+        }
+
+        .bento-card {
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            text-align: center;
+            border-radius: 20px;
+            position: relative;
+        }
+
+        .bento-card-full {
+            grid-column: span 2;
+        }
+
+        .vehicle-icon-container {
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 80px;
+        }
+
+        .telemetry-label {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+        }
+
+        .telemetry-value {
+            font-family: var(--font-title);
+            font-size: 1.25rem;
+            font-weight: 800;
+            color: var(--text-primary);
+        }
+
+        .bento-warning-card {
+            background: rgba(229, 62, 62, 0.08) !important;
+            border: 1px solid rgba(229, 62, 62, 0.25) !important;
+            color: var(--danger);
+            text-align: left;
+            align-items: flex-start;
+        }
+
+        @media (max-width: 600px) {
+            .bento-grid {
+                grid-template-columns: 1fr;
+            }
+            .bento-card-full {
+                grid-column: span 1;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Overlay de Carga -->
+    <div id="loading-spinner" class="spinner-overlay">
+        <div class="spinner"></div>
+        <p style="font-family: var(--font-title); font-weight: 600; color: var(--text-primary);">Sincronizando estado...</p>
+    </div>
+
+    <!-- Contenedor App -->
+    <div class="app-container" style="max-width: 500px;">
+        
+        <!-- Header -->
+        <header class="navbar glass-panel" style="padding: 12px 20px; margin-bottom: 16px; justify-content: center;">
+            <div class="brand">
+                <img src="https://i.imgur.com/seIwnhu.png" alt="Logo" style="height: 32px;">
+                <span class="brand-name" id="ticket-brand-name" style="font-size: 1.2rem;">GOWASH TICKET</span>
+            </div>
+        </header>
+
+        <!-- Ticket Card Principal Overhaul (Bento Layout) -->
+        <div id="ticket-content" style="display: none; margin-top: 20px;">
+            <!-- Header Card (Plate and Status) -->
+            <div class="glass-panel bento-card bento-card-full" style="padding: 20px 24px; flex-direction: row; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+                <div style="text-align: left;">
+                    <div style="font-size: 0.75rem; color: var(--text-secondary); font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">Boleto Digital</div>
+                    <div class="plate-header" id="plate-display" style="border-bottom: none; margin-bottom: 0; padding-bottom: 0; font-size: 2rem; display: inline; width: auto;">AAA123A</div>
+                    <div id="brand-model-display" style="font-size: 1rem; color: var(--text-secondary); font-weight: 600; margin-top: 4px; display: none;"></div>
+                </div>
+                <div id="status-banner" class="vehicle-status-banner" style="margin-bottom: 0; padding: 8px 16px; border-radius: 10px;">
+                    Cargando estado...
+                </div>
+            </div>
+
+            <div class="bento-grid">
+                <!-- Card 1: Bóveda Legal (Full Width inside Bento) -->
+                <div class="glass-panel bento-card bento-card-full" style="align-items: stretch;">
+                    <div style="text-align: left; font-size: 0.75rem; color: var(--text-secondary); font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 12px;">
+                        📸 Bóveda Legal (Inspección de Entrada)
+                    </div>
+                    <div class="carousel-container" style="margin: 0; aspect-ratio: 1.6;">
+                        <button class="carousel-btn carousel-btn-prev" id="carousel-prev" style="margin: 0;">&lt;</button>
+                        <button class="carousel-btn carousel-btn-next" id="carousel-next" style="margin: 0;">&gt;</button>
+                        <div class="carousel-slides" id="carousel-slides">
+                            <!-- Slides inyectados por JS -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 2: Telemetry & Cost -->
+                <div class="glass-panel bento-card">
+                    <div class="vehicle-icon-container" id="vehicle-icon-wrapper">
+                        <!-- Sparkles/Clean icon for GoWash -->
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="width: 70px; height: 70px; color: var(--primary); filter: drop-shadow(0 0 8px var(--primary-glow));">
+                            <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+                        </svg>
+                    </div>
+                    
+                    <div style="width: 100%; display: flex; flex-direction: column; gap: 12px;">
+                        <div>
+                            <div class="telemetry-label">Tipo de Lavado</div>
+                            <div class="telemetry-value" id="vehicle-type-display">Básico</div>
+                        </div>
+                        <div style="border-top: 1px solid var(--border-color); padding-top: 8px;">
+                            <div class="telemetry-label">Tiempo Transcurrido</div>
+                            <div class="telemetry-value" id="chronometer" style="font-size: 1.5rem; color: var(--text-primary); font-weight: 800; margin-top: 2px;">00:00:00</div>
+                        </div>
+                        <div style="border-top: 1px solid var(--border-color); padding-top: 8px;">
+                            <div class="telemetry-label">Total del Servicio</div>
+                            <div class="telemetry-value" id="price-display" style="font-size: 1.6rem; color: var(--primary); font-weight: 800; margin-top: 2px;">$0.00 MXN</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 3: Action Center -->
+                <div class="glass-panel bento-card" style="justify-content: center; gap: 16px;">
+                    <div style="width: 100%;">
+                        <div class="telemetry-label" style="margin-bottom: 8px;">Acciones de Pago</div>
+                        <div class="actions-group" id="actions-group">
+                            <button id="btn-pay-mp" class="btn btn-primary" style="padding: 14px; font-size: 0.95rem; width: 100%;">
+                                💳 [ PAGAR CON MERCADO PAGO ]
+                            </button>
+                            <button id="btn-pay-cash" class="btn btn-secondary" style="padding: 12px; font-size: 0.9rem; border-color: rgba(214, 158, 46, 0.3); width: 100%;">
+                                💵 [ PAGO EN EFECTIVO AL ENTREGAR ]
+                            </button>
+                        </div>
+                        
+                        <div id="msg-pago-exitoso" style="display: none; padding: 12px; background: rgba(255, 127, 0, 0.08); border: 1px solid var(--primary); border-radius: 12px; color: var(--primary); font-weight: 600; font-size: 0.85rem; text-align: left;">
+                            ✓ Pago registrado. Tu lavador ya está preparando tu auto para la entrega.
+                        </div>
+                    </div>
+                    
+                    <p id="checkout-note" style="font-size: 0.75rem; color: var(--text-secondary); line-height: 1.4; text-align: left; width: 100%;">
+                        Muestra la pantalla de 'Pago Exitoso' a tu lavador para recibir tus llaves y tu vehículo.
+                    </p>
+                </div>
+
+                <!-- Card 4: Location & Contact -->
+                <div class="glass-panel bento-card bento-card-full" style="align-items: stretch; gap: 16px; text-align: left;">
+                    <div style="font-size: 0.75rem; color: var(--text-secondary); font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">
+                        📍 Ubicación y Contacto
+                    </div>
+                    
+                    <div style="display: flex; gap: 16px; align-items: center; flex-wrap: wrap;">
+                        <button id="btn-open-map" class="btn btn-secondary" style="flex: 1; min-width: 150px; font-size: 0.9rem; padding: 12px;">
+                            🧭 [ Abrir Mapa ]
+                        </button>
+                        
+                        <div id="valet-phone-wrapper" style="flex: 1; min-width: 150px;">
+                            <a id="btn-call-valet" href="#" class="btn btn-secondary" style="width: 100%; font-size: 0.9rem; padding: 12px; border-color: rgba(229, 62, 62, 0.3); color: var(--danger); display: flex; align-items: center; justify-content: center; text-decoration: none;">
+                                📞 [ Llamar al Autolavado ]
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <div style="border-top: 1px solid var(--border-color); padding-top: 8px;">
+                        <span style="font-size: 0.75rem; color: var(--text-secondary); font-weight: bold;">🚨 ¿Alguna duda o aclaración?</span>
+                        <span style="font-size: 0.75rem; color: var(--text-secondary); display: block; margin-top: 2px;">
+                            Si tienes alguna pregunta sobre tu auto o el estatus del lavado, llama directamente a la oficina de atención.
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Card 5: Basement Warning (Sótano) -->
+                <div id="sotano-warning-card" class="glass-panel bento-card bento-card-full bento-warning-card" style="display: none; padding: 20px;">
+                    <h4 style="font-family: var(--font-title); font-weight: 700; font-size: 0.95rem; display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
+                        ⚠️ Advertencia de Conectividad
+                    </h4>
+                    <p style="font-size: 0.8rem; color: rgba(229, 62, 62, 0.8); line-height: 1.5; margin: 0;">
+                        El establecimiento reporta señal limitada. Las notificaciones y actualizaciones en vivo de tu lavado podrían demorarse en la red celular.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Ticket no encontrado o error -->
+        <div class="glass-panel ticket-view-card" id="ticket-error" style="display: none; padding: 40px 24px;">
+            <span style="font-size: 3rem;">⚠️</span>
+            <h2 style="margin-top: 16px; margin-bottom: 8px;">Ticket no encontrado</h2>
+            <p style="color: var(--text-secondary); margin-bottom: 24px;">El ID de servicio proporcionado no existe en nuestro sistema o la URL es incorrecta.</p>
+            <a href="index.html" class="btn btn-secondary" style="width: 100%;">Volver al inicio</a>
+        </div>
+
+        <!-- Footer -->
+        <footer style="margin-top: 32px; padding: 20px 0; text-align: center; border-top: 1px solid var(--border-color); display: flex; flex-direction: column; gap: 8px; align-items: center;">
+            <p style="font-size: 0.8rem; color: var(--text-secondary);">© 2026 GoWash por Chili Code. Todos los derechos reservados.</p>
+            <div style="font-size: 0.75rem;">
+                <a href="terminos.html" style="color: var(--text-secondary); text-decoration: none; margin: 0 10px;">Términos de Uso</a> | 
+                <a href="privacidad.html" style="color: var(--text-secondary); text-decoration: none; margin: 0 10px;">Aviso de Privacidad</a>
+            </div>
+            <div style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 8px; display: inline-flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                <span>Una submarca de</span>
+                <a href="https://chilicode-official.github.io/ChiliCode/" target="_blank" style="display: inline-flex; align-items: center; gap: 6px; text-decoration: none; color: var(--text-primary); font-weight: 700;">
+                    <img src="https://i.imgur.com/h3CpChF.png" alt="Chili Code" style="height: 16px; object-fit: contain;">
+                    <span>Chili Code</span>
+                </a>
+            </div>
+        </footer>
+
+    </div>
+
+    <!-- SCRIPT DE FIREBASE & LÓGICA -->
+    <script type="module">
+        import { db } from "./firebase-config.js";
+        import { 
+            doc, 
+            onSnapshot, 
+            updateDoc, 
+            getDoc,
+            serverTimestamp 
+        } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const ticketId = urlParams.get('id');
+
+        const spinner = document.getElementById('loading-spinner');
+        const ticketContent = document.getElementById('ticket-content');
+        const ticketError = document.getElementById('ticket-error');
+
+        if (!ticketId) {
+            ticketError.style.display = 'block';
+        } else {
+            showSpinner(true);
+            initTicketSubscription();
+        }
+
+        let tarifaHora = 80;
+        let paymentLink = null;
+        let ubicacionUrl = "";
+        let telefonoValet = "";
+        let esSotano = false;
+        let sucursalFetched = null;
+
+        function showSpinner(show) {
+            spinner.style.display = show ? 'flex' : 'none';
+        }
+
+        let cronometerInterval = null;
+
+        // Suscripción al servicio
+        function initTicketSubscription() {
+            const ticketDocRef = doc(db, 'servicios', ticketId);
+
+            onSnapshot(ticketDocRef, (docSnap) => {
+                showSpinner(false);
+                
+                if (!docSnap.exists()) {
+                    ticketContent.style.display = 'none';
+                    ticketError.style.display = 'block';
+                    return;
+                }
+
+                const data = docSnap.data();
+                ticketError.style.display = 'none';
+                ticketContent.style.display = 'block';
+
+                document.getElementById('plate-display').textContent = data.plate;
+
+                // Mostrar Marca y Modelo
+                const brandModelEl = document.getElementById('brand-model-display');
+                if (brandModelEl) {
+                    const parts = [data.brand, data.modeloAuto].filter(Boolean);
+                    if (parts.length > 0) {
+                        brandModelEl.textContent = parts.join(' ');
+                        brandModelEl.style.display = 'block';
+                    } else {
+                        brandModelEl.style.display = 'none';
+                    }
+                }
+
+                // Fetch de Configuración de Negocio
+                if (data.negocioId && sucursalFetched !== data.negocioId) {
+                    sucursalFetched = data.negocioId;
+                    const sucursalDocRef = doc(db, 'negocios', data.negocioId);
+                    getDoc(sucursalDocRef).then((sucSnap) => {
+                        if (sucSnap.exists()) {
+                            const sData = sucSnap.data();
+                            paymentLink = sData.paymentLink || null;
+                            tarifaHora = sData.tarifaHora !== undefined ? Number(sData.tarifaHora) : 80;
+                            ubicacionUrl = sData.ubicacionUrl || "";
+                            telefonoValet = sData.telefono || "";
+                            esSotano = sData.esSotano || false;
+
+                            const brandNameText = sData.nombreEstacionamiento || "GoWash Ticket";
+                            const brandElement = document.getElementById('ticket-brand-name');
+                            if (brandElement) {
+                                brandElement.textContent = brandNameText.toUpperCase();
+                            }
+                            document.title = `${brandNameText} | GoWash Ticket`;
+
+                            if (sData.colorAcento) {
+                                document.documentElement.style.setProperty('--primary', sData.colorAcento);
+                                document.documentElement.style.setProperty('--primary-glow', sData.colorAcento + '59');
+                                document.documentElement.style.setProperty('--primary-bg', sData.colorAcento + '1a');
+                            }
+
+                            const sotanoCard = document.getElementById('sotano-warning-card');
+                            if (sotanoCard) {
+                                sotanoCard.style.display = esSotano ? 'flex' : 'none';
+                            }
+
+                            const btnMap = document.getElementById('btn-open-map');
+                            if (btnMap) {
+                                if (ubicacionUrl) {
+                                    btnMap.disabled = false;
+                                    btnMap.style.opacity = '1';
+                                    btnMap.onclick = () => window.open(ubicacionUrl, '_blank');
+                                } else {
+                                    btnMap.disabled = true;
+                                    btnMap.style.opacity = '0.5';
+                                    btnMap.onclick = null;
+                                }
+                            }
+
+                            const btnCall = document.getElementById('btn-call-valet');
+                            if (btnCall) {
+                                if (telefonoValet) {
+                                    btnCall.href = `tel:${telefonoValet}`;
+                                    btnCall.style.opacity = '1';
+                                    btnCall.style.pointerEvents = 'auto';
+                                } else {
+                                    btnCall.href = "#";
+                                    btnCall.style.opacity = '0.5';
+                                    btnCall.style.pointerEvents = 'none';
+                                }
+                            }
+                        }
+                    }).catch((err) => {
+                        console.error("Error fetching business settings:", err);
+                    });
+                }
+
+                // Mostrar Tipo de Lavado
+                const tipoLavado = data.tipoLavado || 'basico';
+                const vehicleTypeDisplay = document.getElementById('vehicle-type-display');
+                const vehicleIconWrapper = document.getElementById('vehicle-icon-wrapper');
+                
+                if (tipoLavado === 'cerámico') {
+                    vehicleTypeDisplay.textContent = 'Cerámico ✨';
+                    vehicleIconWrapper.innerHTML = `
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="width: 70px; height: 70px; color: var(--primary); filter: drop-shadow(0 0 8px var(--primary-glow));">
+                            <path d="m12 3-1.912 5.886L4.2 9.25l4.9 3.561L7.19 18.7 12 15l4.81 3.7-1.91-5.889 4.9-3.561-5.89-.364L12 3z"/>
+                        </svg>
+                    `;
+                } else if (tipoLavado === 'premium') {
+                    vehicleTypeDisplay.textContent = 'Premium 🚙';
+                    vehicleIconWrapper.innerHTML = `
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="width: 70px; height: 70px; color: var(--primary); filter: drop-shadow(0 0 8px var(--primary-glow));">
+                            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                        </svg>
+                    `;
+                } else {
+                    vehicleTypeDisplay.textContent = 'Básico 🚗';
+                    vehicleIconWrapper.innerHTML = `
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="width: 70px; height: 70px; color: var(--primary); filter: drop-shadow(0 0 8px var(--primary-glow));">
+                            <path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9C2 11.2 2 11.6 2 12v4c0 .6.4 1 1 1h2" />
+                            <circle cx="7" cy="17" r="2" />
+                            <path d="M9 17h6" />
+                            <circle cx="17" cy="17" r="2" />
+                        </svg>
+                    `;
+                }
+
+                // Estado Visual del Auto
+                const statusBanner = document.getElementById('status-banner');
+                const actionsGroup = document.getElementById('actions-group');
+                const successMsg = document.getElementById('msg-pago-exitoso');
+                const checkoutNote = document.getElementById('checkout-note');
+
+                if (data.status === 'estacionado') {
+                    statusBanner.className = 'vehicle-status-banner status-estacionado';
+                    statusBanner.textContent = 'Lavándose';
+                    actionsGroup.style.display = 'flex';
+                    successMsg.style.display = 'none';
+                    if (checkoutNote) checkoutNote.style.display = 'block';
+                } else if (data.status === 'solicitado') {
+                    statusBanner.className = 'vehicle-status-banner status-solicitado';
+                    statusBanner.textContent = data.metodoPago === 'efectivo' 
+                        ? 'Listo (Por Pagar Efectivo)' 
+                        : 'Lavado Terminado (Listo)';
+                    actionsGroup.style.display = 'none';
+                    successMsg.style.display = 'none';
+                    if (checkoutNote) checkoutNote.style.display = 'none';
+                } else if (data.status === 'pagado') {
+                    statusBanner.className = 'vehicle-status-banner status-pagado';
+                    statusBanner.textContent = 'Pagado - En Entrega';
+                    actionsGroup.style.display = 'none';
+                    successMsg.style.display = 'block';
+                    if (checkoutNote) checkoutNote.style.display = 'none';
+                } else if (data.status === 'entregado') {
+                    statusBanner.className = 'vehicle-status-banner status-estacionado';
+                    statusBanner.textContent = 'Vehículo Entregado';
+                    actionsGroup.style.display = 'none';
+                    successMsg.style.display = 'none';
+                    if (checkoutNote) checkoutNote.style.display = 'none';
+                    
+                    if (cronometerInterval) clearInterval(cronometerInterval);
+                    document.getElementById('chronometer').textContent = 'Completado';
+                }
+
+                // Renderizar carrusel
+                renderCarousel(data.photos);
+
+                // Iniciar Cronómetro
+                if (data.status !== 'entregado' && data.createdAt) {
+                    const entryTime = data.createdAt.toDate();
+                    if (cronometerInterval) clearInterval(cronometerInterval);
+                    updateTimerAndPrice(entryTime);
+                    cronometerInterval = setInterval(() => {
+                        updateTimerAndPrice(entryTime);
+                    }, 1000);
+                } else if (!data.createdAt) {
+                    document.getElementById('chronometer').textContent = '00:00:00';
+                    document.getElementById('price-display').textContent = `$${tarifaHora.toFixed(2)} MXN`;
+                }
+
+                setupPaymentActions(data);
+
+            }, (err) => {
+                console.error("Error al cargar ticket:", err);
+                showSpinner(false);
+                ticketError.style.display = 'block';
+            });
+        }
+
+        // Render del carrusel
+        let currentSlide = 0;
+        function renderCarousel(photos) {
+            const container = document.getElementById('carousel-slides');
+            container.innerHTML = '';
+            
+            const orderedKeys = ['frente', 'atras', 'izq', 'der', 'techo'];
+            let count = 0;
+
+            orderedKeys.forEach(key => {
+                if (photos && photos[key]) {
+                    count++;
+                    const slide = document.createElement('div');
+                    slide.className = 'carousel-slide';
+                    slide.innerHTML = `
+                        <img src="${photos[key]}" alt="Foto ${key}">
+                        <div class="carousel-slide-label">${key.toUpperCase()}</div>
+                    `;
+                    container.appendChild(slide);
+                }
+            });
+
+            if (count === 0) {
+                const slide = document.createElement('div');
+                slide.className = 'carousel-slide';
+                slide.innerHTML = `
+                    <div style="display: flex; align-items: center; justify-content: center; height: 100%; color: var(--text-secondary);">
+                        Sin fotos de inspección.
+                    </div>
+                `;
+                container.appendChild(slide);
+            }
+        }
+
+        // Navegación
+        const slidesContainer = document.getElementById('carousel-slides');
+        document.getElementById('carousel-prev').addEventListener('click', () => {
+            const totalSlides = slidesContainer.children.length;
+            if (totalSlides > 1) {
+                currentSlide = (currentSlide - 1 + totalSlides) % totalSlides;
+                slidesContainer.style.transform = `translateX(-${currentSlide * 100}%)`;
+            }
+        });
+
+        document.getElementById('carousel-next').addEventListener('click', () => {
+            const totalSlides = slidesContainer.children.length;
+            if (totalSlides > 1) {
+                currentSlide = (currentSlide + 1) % totalSlides;
+                slidesContainer.style.transform = `translateX(-${currentSlide * 100}%)`;
+            }
+        });
+
+        // Cronómetro
+        function updateTimerAndPrice(entryDate) {
+            const now = new Date();
+            const diffMs = now - entryDate;
+            if (diffMs < 0) return;
+
+            const diffSecs = Math.floor(diffMs / 1000);
+            const hours = Math.floor(diffSecs / 3600);
+            const minutes = Math.floor((diffSecs % 3600) / 60);
+            const seconds = diffSecs % 60;
+
+            const format = (num) => String(num).padStart(2, '0');
+            document.getElementById('chronometer').textContent = `${format(hours)}:${format(minutes)}:${format(seconds)}`;
+
+            // Tarifa calculada por hora o fracción
+            const totalMinutes = Math.floor(diffSecs / 60);
+            const billingHours = Math.max(1, Math.ceil(totalMinutes / 60));
+            const finalPrice = billingHours * tarifaHora;
+
+            document.getElementById('price-display').textContent = `$${finalPrice.toFixed(2)} MXN`;
+        }
+
+        // Acciones de pago
+        function setupPaymentActions(ticketData) {
+            const btnPayMP = document.getElementById('btn-pay-mp');
+            const btnCash = document.getElementById('btn-pay-cash');
+
+            btnPayMP.onclick = () => {
+                if (paymentLink) {
+                    window.location.href = paymentLink;
+                } else {
+                    alert("Pagos digitales deshabilitados en este establecimiento.");
+                }
+            };
+
+            btnCash.onclick = async () => {
+                if (confirm('¿Confirmas que deseas notificar la terminación y pagar en efectivo al recibir tu vehículo?')) {
+                    showSpinner(true);
+                    try {
+                        await updateDoc(doc(db, 'servicios', ticketId), {
+                            status: 'solicitado',
+                            metodoPago: 'efectivo',
+                            updatedAt: serverTimestamp()
+                        });
+                    } catch (err) {
+                        console.error("Error al solicitar efectivo:", err);
+                        alert("Ocurrió un error al procesar tu solicitud.");
+                    } finally {
+                        showSpinner(false);
+                    }
+                }
+            };
+        }
+    </script>
+</body>
+</html>

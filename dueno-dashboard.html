@@ -1,0 +1,1103 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Administración | GoWash</title>
+    
+    <!-- Favicon / PWA Icon -->
+    <link rel="icon" type="image/png" href="https://i.imgur.com/seIwnhu.png">
+    
+    <!-- Hojas de estilo -->
+    <link rel="stylesheet" href="style.css">
+    
+    <style>
+        .dashboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 28px;
+            margin-bottom: 24px;
+        }
+
+        .header-brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .sucursal-tag {
+            background: var(--primary-bg);
+            color: var(--primary);
+            padding: 6px 12px;
+            border-radius: 10px;
+            font-size: 0.85rem;
+            font-weight: 700;
+        }
+
+        /* Tarjetas de Métricas */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            margin-bottom: 32px;
+        }
+
+        @media (max-width: 1024px) {
+            .metrics-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 600px) {
+            .metrics-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .metric-card {
+            padding: 24px;
+            text-align: left;
+            position: relative;
+        }
+
+        .metric-title {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 8px;
+            font-weight: 700;
+        }
+
+        .metric-value {
+            font-family: var(--font-title);
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--text-primary);
+        }
+
+        .metric-value.highlight {
+            color: var(--primary);
+        }
+
+        .metric-value.alert-value {
+            color: var(--warning);
+        }
+
+        .metric-icon {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            font-size: 1.5rem;
+            opacity: 0.2;
+        }
+
+        /* Bóveda Legal Table */
+        .vault-section {
+            padding: 28px;
+        }
+
+        .vault-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            gap: 16px;
+        }
+
+        @media (max-width: 768px) {
+            .vault-header {
+                flex-direction: column;
+                align-items: stretch;
+            }
+        }
+
+        .search-container {
+            position: relative;
+            flex-grow: 1;
+            max-width: 400px;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 12px 16px 12px 40px;
+            background: rgba(0, 0, 0, 0.02);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            color: var(--text-primary);
+            font-family: var(--font-body);
+            transition: var(--transition-smooth);
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: #FFFFFF;
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-secondary);
+            font-size: 1rem;
+        }
+
+        /* Estilo de tabla */
+        .table-responsive {
+            width: 100%;
+            overflow-x: auto;
+        }
+
+        .vault-table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+        }
+
+        .vault-table th, .vault-table td {
+            padding: 16px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .vault-table th {
+            font-family: var(--font-title);
+            font-weight: 700;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            font-size: 0.8rem;
+            letter-spacing: 0.05em;
+        }
+
+        .vault-table tr:hover td {
+            background: rgba(0, 0, 0, 0.01);
+        }
+
+        .vault-table td .plate-badge {
+            font-family: var(--font-title);
+            font-weight: 700;
+            letter-spacing: 0.05em;
+            font-size: 1.1rem;
+            color: var(--text-primary);
+        }
+
+        /* Modal Detalles Bóveda */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(18, 20, 29, 0.95);
+            backdrop-filter: blur(8px);
+            z-index: 2000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+        }
+
+        .modal-content {
+            background: #FFFFFF;
+            width: 100%;
+            max-width: 800px;
+            padding: 32px;
+            border-radius: 24px;
+            border: 1px solid var(--border-color);
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        .photos-grid-detail {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .photos-grid-detail {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        .photo-detail-item {
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+            aspect-ratio: 1;
+            position: relative;
+            cursor: pointer;
+        }
+
+        .photo-detail-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+
+        .photo-detail-item:hover img {
+            transform: scale(1.1);
+        }
+
+        .photo-label {
+            position: absolute;
+            bottom: 8px;
+            left: 8px;
+            background: rgba(0,0,0,0.8);
+            color: white;
+            font-size: 0.65rem;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        /* Loader */
+        .spinner-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(255, 255, 255, 0.85);
+            z-index: 3000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .spinner {
+            width: 50px; height: 50px;
+            border: 5px solid rgba(0,0,0,0.05);
+            border-top: 5px solid var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Insumos químicos styling */
+        .chem-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(255, 127, 0, 0.08);
+            border: 1px solid rgba(255, 127, 0, 0.15);
+            color: var(--primary);
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-right: 8px;
+            margin-bottom: 8px;
+        }
+
+        .chem-tag button {
+            background: transparent;
+            border: none;
+            color: var(--primary);
+            font-weight: 800;
+            cursor: pointer;
+            font-size: 0.95rem;
+            outline: none;
+        }
+
+        @media (max-width: 600px) {
+            #config-form {
+                grid-template-columns: 1fr !important;
+            }
+            #config-form > div {
+                grid-column: span 1 !important;
+            }
+
+            /* Tabla de Bóveda Legal responsiva en móvil */
+            .vault-table, .vault-table tbody, .vault-table tr, .vault-table td {
+                display: block;
+                width: 100%;
+            }
+
+            .vault-table thead {
+                display: none;
+            }
+
+            .vault-table tr {
+                background: rgba(0, 0, 0, 0.01);
+                border: 1px solid var(--border-color);
+                border-radius: 16px;
+                padding: 16px;
+                margin-bottom: 16px;
+            }
+
+            .vault-table td {
+                padding: 10px 0;
+                border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                text-align: right;
+            }
+
+            .vault-table td:last-child {
+                border-bottom: none;
+                padding-bottom: 0;
+                margin-top: 8px;
+            }
+
+            .vault-table td::before {
+                content: attr(data-label);
+                font-family: var(--font-title);
+                font-weight: 700;
+                color: var(--text-secondary);
+                text-transform: uppercase;
+                font-size: 0.75rem;
+                text-align: left;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Spinner -->
+    <div id="loading-spinner" class="spinner-overlay">
+        <div class="spinner"></div>
+    </div>
+
+    <!-- Contenedor principal -->
+    <div class="app-container">
+        
+        <!-- Header -->
+        <header class="navbar glass-panel dashboard-header">
+            <div class="header-brand">
+                <img src="https://i.imgur.com/seIwnhu.png" alt="GoWash Logo" style="height: 40px;">
+                <span class="brand-name">GOWASH DUEÑO</span>
+            </div>
+            <div class="header-actions">
+                <span class="sucursal-tag" id="sucursal-badge">NEG-XXXX</span>
+                <button id="btn-logout" class="btn btn-secondary" style="padding: 8px 16px;">Cerrar Sesión</button>
+            </div>
+        </header>
+
+        <!-- Fila de Métricas -->
+        <section class="metrics-grid">
+            <!-- Pagos Digitales -->
+            <div class="glass-panel metric-card">
+                <span class="metric-icon">💳</span>
+                <div class="metric-title">Pagos Digitales</div>
+                <div class="metric-value highlight" id="metric-stripe">$0.00</div>
+            </div>
+
+            <!-- Efectivo por Auditar -->
+            <div class="glass-panel metric-card">
+                <span class="metric-icon">💵</span>
+                <div class="metric-title">Efectivo por Auditar</div>
+                <div class="metric-value alert-value" id="metric-cash">$0.00</div>
+            </div>
+
+            <!-- Vehículos Activos -->
+            <div class="glass-panel metric-card">
+                <span class="metric-icon">🚗</span>
+                <div class="metric-title">Autos Activos (Lavándose)</div>
+                <div class="metric-value" id="metric-active">0</div>
+            </div>
+
+            <!-- Autos Entregados -->
+            <div class="glass-panel metric-card">
+                <span class="metric-icon">✓</span>
+                <div class="metric-title">Servicios Completados</div>
+                <div class="metric-value" id="metric-delivered">0</div>
+            </div>
+        </section>
+
+        <!-- Configuración de Negocio -->
+        <section class="glass-panel" style="padding: 28px; margin-bottom: 32px;">
+            <h2 style="font-family: var(--font-title); margin-bottom: 4px;">⚙️ Configuración del Autolavado</h2>
+            <p style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 20px;">
+                Define las tarifas, información de contacto y pasarela de pago para este negocio.
+            </p>
+            <form id="config-form" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px;">
+                <div class="form-group" style="margin-bottom: 0;">
+                    <label for="brand-name-input" class="form-label">Nombre Comercial del Autolavado</label>
+                    <input type="text" id="brand-name-input" class="form-control" placeholder="Ej. GoWash Monterrey" autocomplete="off">
+                </div>
+                <div class="form-group" style="margin-bottom: 0;">
+                    <label for="color-input" class="form-label">Color de Acento (HEX)</label>
+                    <input type="text" id="color-input" class="form-control" placeholder="#FF7F00" autocomplete="off">
+                </div>
+                <div class="form-group" style="grid-column: span 2; margin-bottom: 0;">
+                    <label for="payment-link-input" class="form-label">Link de Cobro Mercado Pago</label>
+                    <input type="url" id="payment-link-input" class="form-control" placeholder="https://link.mercadopago.com.mx/..." autocomplete="off">
+                </div>
+                <div class="form-group" style="margin-bottom: 0;">
+                    <label for="tarifa-input" class="form-label">Tarifa de Lavado Base (MXN)</label>
+                    <input type="number" id="tarifa-input" class="form-control" placeholder="80" min="0" autocomplete="off">
+                </div>
+                <div class="form-group" style="margin-bottom: 0;">
+                    <label for="phone-input" class="form-label">Teléfono del Negocio</label>
+                    <input type="tel" id="phone-input" class="form-control" placeholder="+52 81 1234 5678" autocomplete="off">
+                </div>
+                <div class="form-group" style="grid-column: span 2; margin-bottom: 0;">
+                    <label for="maps-input" class="form-label">URL de Google Maps del Establecimiento</label>
+                    <input type="url" id="maps-input" class="form-control" placeholder="https://maps.app.goo.gl/..." autocomplete="off">
+                </div>
+                <div class="form-group" style="grid-column: span 2; flex-direction: row; align-items: center; gap: 12px; margin-top: 10px; margin-bottom: 0;">
+                    <input type="checkbox" id="sotano-checkbox" style="width: 20px; height: 20px; accent-color: var(--primary); cursor: pointer;">
+                    <label for="sotano-checkbox" class="form-label" style="margin-bottom: 0; cursor: pointer; text-transform: none;">¿Establecimiento en Sótano / Conectividad Limitada?</label>
+                </div>
+                
+                <!-- Inventario de químicos -->
+                <div class="form-group" style="grid-column: span 2; margin-top: 16px; border-top: 1px solid var(--border-color); padding-top: 16px;">
+                    <label class="form-label">🧪 Control de Insumos Químicos</label>
+                    <div style="display: flex; gap: 12px; margin-bottom: 12px;">
+                        <input type="text" id="chem-input" class="form-control" placeholder="Ej. Shampoo Autolavado" style="min-height: 40px; padding: 8px 12px;" autocomplete="off">
+                        <button type="button" id="btn-add-chem" class="btn btn-primary" style="min-height: 40px; padding: 8px 20px; font-size: 0.85rem;">+ Agregar</button>
+                    </div>
+                    <div id="chem-list-container" style="padding: 12px 16px; border: 1px solid var(--border-color); border-radius: 12px; min-height: 50px; background: rgba(0,0,0,0.01);">
+                        <!-- Chemical list generated dynamically -->
+                    </div>
+                </div>
+
+                <div style="grid-column: span 2; text-align: right; margin-top: 10px;">
+                    <button type="button" id="btn-save-config" class="btn btn-primary" style="padding: 12px 32px;">Guardar Configuración</button>
+                </div>
+            </form>
+        </section>
+
+        <!-- Bóveda Legal -->
+        <section class="glass-panel vault-section">
+            <div class="vault-header">
+                <div>
+                    <h2 style="font-family: var(--font-title); margin-bottom: 4px;">🛡️ Bóveda Legal</h2>
+                    <p style="font-size: 0.9rem; color: var(--text-secondary);">Inspección visual de entrada, tipo de lavado e historial de auditoría.</p>
+                </div>
+                
+                <!-- Buscador por Placas -->
+                <div class="search-container">
+                    <span class="search-icon">🔍</span>
+                    <input type="text" id="vault-search" class="search-input" placeholder="Buscar por placa... (e.g. AAA-123)">
+                </div>
+            </div>
+
+            <div class="table-responsive">
+                <table class="vault-table">
+                    <thead>
+                        <tr>
+                            <th>Vehículo / Modelo</th>
+                            <th>Ingreso</th>
+                            <th>Estado</th>
+                            <th>Lavado / Notas</th>
+                            <th style="text-align: right;">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="vault-table-body">
+                        <tr>
+                            <td colspan="5" style="text-align: center; color: var(--text-secondary); padding: 40px 0;">
+                                Conectando con la base de datos...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Gestión de Personal (Lavadores) -->
+        <section class="glass-panel" style="padding: 28px; margin-top: 32px; margin-bottom: 32px;">
+            <div style="margin-bottom: 24px;">
+                <h2 style="font-family: var(--font-title); margin-bottom: 4px;">👥 Gestión de Personal (Lavadores)</h2>
+                <p style="font-size: 0.9rem; color: var(--text-secondary);">
+                    Registra y administra los accesos para los trabajadores (lavadores) de este autolavado.
+                </p>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr; gap: 32px;">
+                <!-- Formulario Agregar Empleado -->
+                <div style="background: rgba(0, 0, 0, 0.01); border: 1px solid var(--border-color); padding: 20px; border-radius: 16px;">
+                    <h3 style="font-family: var(--font-title); font-size: 1.15rem; margin-bottom: 16px; color: var(--text-primary);">Agregar Nuevo Lavador</h3>
+                    <form id="add-valet-form" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px;">
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label for="valet-name-input" class="form-label">Nombre del Trabajador</label>
+                            <input type="text" id="valet-name-input" class="form-control" placeholder="Ej. Juan Pérez" required autocomplete="off">
+                        </div>
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label for="valet-pin-input" class="form-label">PIN de Acceso (4-6 dígitos)</label>
+                            <input type="password" id="valet-pin-input" class="form-control" placeholder="••••" maxlength="6" inputmode="numeric" pattern="[0-9]{4,6}" required>
+                        </div>
+                        <div style="grid-column: span 2; text-align: right; margin-top: 10px;">
+                            <button type="submit" id="btn-add-valet" class="btn btn-primary" style="padding: 10px 24px; font-size: 0.85rem; min-height: 40px;">Registrar Lavador</button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Tabla de Personal -->
+                <div>
+                    <h3 style="font-family: var(--font-title); font-size: 1.15rem; margin-bottom: 16px; color: var(--text-primary);">Personal Activo</h3>
+                    <div class="table-responsive">
+                        <table class="vault-table" style="width: 100%; border-collapse: collapse; text-align: left;">
+                            <thead>
+                                <tr style="border-bottom: 1px solid var(--border-color);">
+                                    <th style="padding: 12px; color: var(--text-secondary); font-size: 0.8rem; text-transform: uppercase;">Nombre</th>
+                                    <th style="padding: 12px; color: var(--text-secondary); font-size: 0.8rem; text-transform: uppercase;">Rol</th>
+                                    <th style="padding: 12px; color: var(--text-secondary); font-size: 0.8rem; text-transform: uppercase;">PIN (Accesos)</th>
+                                    <th style="padding: 12px; color: var(--text-secondary); font-size: 0.8rem; text-transform: uppercase; text-align: right;">Acción</th>
+                                </tr>
+                            </thead>
+                            <tbody id="valets-table-body">
+                                <tr>
+                                    <td colspan="4" style="text-align: center; color: var(--text-secondary); padding: 20px 0;">
+                                        Cargando trabajadores...
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </div>
+
+    <!-- MODAL DETALLES AUTO (BÓVEDA LEGAL) -->
+    <div id="modal-detalle" class="modal-overlay">
+        <div class="modal-content">
+            <button class="modal-close" id="btn-close-modal">&times;</button>
+            
+            <div style="border-bottom: 1px solid var(--border-color); padding-bottom: 20px; margin-bottom: 24px;">
+                <span style="font-size: 0.8rem; color: var(--text-secondary); font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">Expediente de Inspección</span>
+                <h2 style="font-family: var(--font-title); font-size: 2.2rem; color: var(--primary); margin-top: 4px;" id="modal-detail-plate">AAA-123-A</h2>
+                <div style="font-size: 1.1rem; color: var(--text-secondary); font-weight: 600; margin-top: 2px;" id="modal-detail-brand-model"></div>
+                <div style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 4px;" id="modal-detail-time">Ingreso: 05/06/2026 18:00</div>
+            </div>
+
+            <!-- Notas de daños -->
+            <div class="form-group" style="margin-bottom: 28px;">
+                <label class="form-label">Notas registradas al ingreso</label>
+                <div style="padding: 16px; background: rgba(0,0,0,0.02); border-radius: 12px; border: 1px solid var(--border-color); color: var(--text-primary);" id="modal-detail-notes">
+                    Ninguna nota de daños registrada al ingreso.
+                </div>
+            </div>
+
+            <!-- Fotos de inspección en alta calidad -->
+            <label class="form-label">Fotografías Obligatorias de Inspección (5 Ángulos)</label>
+            <div class="photos-grid-detail" id="modal-detail-photos">
+                <!-- Inyectadas por JS -->
+            </div>
+        </div>
+    </div>
+
+    <!-- SCRIPT DE FIREBASE Y LÓGICA -->
+    <script type="module">
+        import { db } from "./firebase-config.js";
+        import { 
+            collection, 
+            onSnapshot, 
+            query, 
+            where,
+            doc,
+            getDoc,
+            setDoc,
+            addDoc,
+            deleteDoc,
+            getDocs,
+            serverTimestamp
+        } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        // Protección de Ruta
+        const negocio = localStorage.getItem('wash_negocio');
+        const role = localStorage.getItem('wash_role');
+        const session = localStorage.getItem('wash_session');
+
+        if (!session || role !== 'dueno' || !negocio) {
+            window.location.href = 'login.html';
+        }
+
+        document.getElementById('sucursal-badge').textContent = negocio;
+
+        // Configuración de Negocio
+        let tarifaHora = 80;
+        let chemicalsInventory = [];
+        const negocioDocRef = doc(db, "negocios", negocio);
+
+        async function loadNegocioConfig() {
+            try {
+                const docSnap = await getDoc(negocioDocRef);
+                if (docSnap.exists()) {
+                    const sData = docSnap.data();
+                    if (sData.nombreEstacionamiento) document.getElementById('brand-name-input').value = sData.nombreEstacionamiento;
+                    if (sData.colorAcento) {
+                        document.getElementById('color-input').value = sData.colorAcento;
+                        // Aplicar color de acento
+                        document.documentElement.style.setProperty('--primary', sData.colorAcento);
+                        document.documentElement.style.setProperty('--primary-glow', sData.colorAcento + '59');
+                        document.documentElement.style.setProperty('--primary-bg', sData.colorAcento + '1a');
+                    }
+                    if (sData.paymentLink) document.getElementById('payment-link-input').value = sData.paymentLink;
+                    if (sData.tarifaHora !== undefined) {
+                        tarifaHora = Number(sData.tarifaHora);
+                        document.getElementById('tarifa-input').value = tarifaHora;
+                    } else {
+                        document.getElementById('tarifa-input').value = 80;
+                    }
+                    if (sData.telefono) document.getElementById('phone-input').value = sData.telefono;
+                    if (sData.ubicacionUrl) document.getElementById('maps-input').value = sData.ubicacionUrl;
+                    if (sData.esSotano !== undefined) document.getElementById('sotano-checkbox').checked = sData.esSotano;
+                    
+                    // Cargar inventario químicos
+                    chemicalsInventory = sData.inventarioQuimicos || [];
+                    renderChemicalsList();
+                } else {
+                    document.getElementById('tarifa-input').value = 80;
+                }
+                updateMetrics();
+            } catch (err) {
+                console.error("Error al cargar configuración de negocio:", err);
+            }
+        }
+        loadNegocioConfig();
+
+        // Control y Render de Químicos
+        function renderChemicalsList() {
+            const container = document.getElementById('chem-list-container');
+            container.innerHTML = '';
+            if (chemicalsInventory.length === 0) {
+                container.innerHTML = '<span style="color: var(--text-secondary); font-size: 0.85rem;">Ningún químico registrado en inventario.</span>';
+                return;
+            }
+            chemicalsInventory.forEach((chem, idx) => {
+                const tag = document.createElement('span');
+                tag.className = 'chem-tag';
+                tag.innerHTML = `${chem} <button type="button" data-index="${idx}">&times;</button>`;
+                tag.querySelector('button').onclick = (e) => {
+                    const i = Number(e.target.getAttribute('data-index'));
+                    chemicalsInventory.splice(i, 1);
+                    renderChemicalsList();
+                };
+                container.appendChild(tag);
+            });
+        }
+
+        document.getElementById('btn-add-chem').onclick = () => {
+            const val = document.getElementById('chem-input').value.trim();
+            if (val && !chemicalsInventory.includes(val)) {
+                chemicalsInventory.push(val);
+                document.getElementById('chem-input').value = '';
+                renderChemicalsList();
+            }
+        };
+
+        // Guardar Configuración
+        document.getElementById('btn-save-config').addEventListener('click', async () => {
+            const nombreEstacionamiento = document.getElementById('brand-name-input').value.trim();
+            const colorAcento = document.getElementById('color-input').value.trim();
+            const paymentLink = document.getElementById('payment-link-input').value.trim();
+            const tarifaInput = document.getElementById('tarifa-input').value.trim();
+            const telefono = document.getElementById('phone-input').value.trim();
+            const ubicacionUrl = document.getElementById('maps-input').value.trim();
+            const esSotano = document.getElementById('sotano-checkbox').checked;
+
+            if (colorAcento !== "" && !/^#[0-9A-Fa-f]{6}$/.test(colorAcento)) {
+                alert("El color de acento debe ser un formato HEX de 6 dígitos válido (ej. #FF7F00).");
+                return;
+            }
+
+            if (tarifaInput === "" || isNaN(tarifaInput) || Number(tarifaInput) < 0) {
+                alert("Por favor ingresa una tarifa válida (mayor o igual a 0).");
+                return;
+            }
+
+            const parsedTarifa = Number(tarifaInput);
+            const spinner = document.getElementById('loading-spinner');
+            spinner.style.display = 'flex';
+
+            try {
+                await setDoc(negocioDocRef, {
+                    nombreEstacionamiento: nombreEstacionamiento,
+                    colorAcento: colorAcento,
+                    paymentLink: paymentLink,
+                    tarifaHora: parsedTarifa,
+                    telefono: telefono,
+                    ubicacionUrl: ubicacionUrl,
+                    esSotano: esSotano,
+                    inventarioQuimicos: chemicalsInventory
+                }, { merge: true });
+                
+                if (colorAcento) {
+                    document.documentElement.style.setProperty('--primary', colorAcento);
+                    document.documentElement.style.setProperty('--primary-glow', colorAcento + '59');
+                    document.documentElement.style.setProperty('--primary-bg', colorAcento + '1a');
+                }
+                
+                tarifaHora = parsedTarifa;
+                updateMetrics();
+                alert("Configuración de negocio guardada exitosamente.");
+            } catch (err) {
+                console.error("Error al guardar configuración:", err);
+                alert("Ocurrió un error al guardar la configuración.");
+            } finally {
+                spinner.style.display = 'none';
+            }
+        });
+
+        // Cierre de Sesión
+        document.getElementById('btn-logout').addEventListener('click', () => {
+            localStorage.clear();
+            window.location.href = 'login.html';
+        });
+
+        // Buscador de Placas
+        const searchInput = document.getElementById('vault-search');
+        let allTickets = [];
+
+        searchInput.addEventListener('input', () => {
+            filterAndRenderTable();
+        });
+
+        // Modales
+        const modalDetalle = document.getElementById('modal-detalle');
+        document.getElementById('btn-close-modal').addEventListener('click', () => {
+            modalDetalle.style.display = 'none';
+        });
+
+        // Suscripción Real-Time a los servicios del negocio
+        const qBranchTickets = query(
+            collection(db, "servicios"),
+            where("negocioId", "==", negocio)
+        );
+
+        const spinner = document.getElementById('loading-spinner');
+        spinner.style.display = 'flex';
+
+        onSnapshot(qBranchTickets, (snapshot) => {
+            spinner.style.display = 'none';
+            allTickets = [];
+            
+            snapshot.forEach(docSnap => {
+                allTickets.push({
+                    id: docSnap.id,
+                    ...docSnap.data()
+                });
+            });
+
+            // Ordenar por fecha de creación desc
+            allTickets.sort((a, b) => {
+                const dateA = a.createdAt?.toDate() || new Date(0);
+                const dateB = b.createdAt?.toDate() || new Date(0);
+                return dateB - dateA;
+            });
+
+            updateMetrics();
+            filterAndRenderTable();
+
+        }, (err) => {
+            console.error("Dashboard subscription error:", err);
+            spinner.style.display = 'none';
+            document.getElementById('vault-table-body').innerHTML = `
+                <tr>
+                    <td colspan="5" style="text-align: center; color: var(--danger); padding: 40px 0;">
+                        Error al conectar con la base de datos en tiempo real. Por favor configura firebase-config.js.
+                    </td>
+                </tr>`;
+        });
+
+        // Calcular Métricas
+        function updateMetrics() {
+            let digitalRevenue = 0;
+            let cashRevenue = 0;
+            let activeCount = 0;
+            let deliveredCount = 0;
+
+            allTickets.forEach(t => {
+                let price = tarifaHora;
+                if (t.createdAt && t.updatedAt) {
+                    const entry = t.createdAt.toDate();
+                    const exit = t.updatedAt.toDate();
+                    const diffMins = Math.floor((exit - entry) / 60000);
+                    const hours = Math.max(1, Math.ceil(diffMins / 60));
+                    price = hours * tarifaHora;
+                }
+
+                if (t.status === 'pagado' || t.status === 'entregado') {
+                    if (t.metodoPago === 'stripe' || t.metodoPago === 'digital') {
+                        digitalRevenue += price;
+                    } else if (t.metodoPago === 'efectivo') {
+                        cashRevenue += price;
+                    }
+                }
+
+                if (t.status === 'entregado') {
+                    deliveredCount++;
+                } else {
+                    activeCount++;
+                }
+            });
+
+            document.getElementById('metric-stripe').textContent = `$${digitalRevenue.toFixed(2)} MXN`;
+            document.getElementById('metric-cash').textContent = `$${cashRevenue.toFixed(2)} MXN`;
+            document.getElementById('metric-active').textContent = activeCount;
+            document.getElementById('metric-delivered').textContent = deliveredCount;
+        }
+
+        // Renderizado e Filtro de Tabla
+        function filterAndRenderTable() {
+            const tableBody = document.getElementById('vault-table-body');
+            const searchVal = searchInput.value.trim().toUpperCase();
+            
+            const filtered = allTickets.filter(t => t.plate.includes(searchVal));
+            tableBody.innerHTML = '';
+
+            if (filtered.length === 0) {
+                tableBody.innerHTML = `
+                    <tr>
+                        <td colspan="5" style="text-align: center; color: var(--text-secondary); padding: 40px 0;">
+                            No se encontraron vehículos.
+                        </td>
+                    </tr>`;
+                return;
+            }
+
+            filtered.forEach(t => {
+                const tr = document.createElement('tr');
+                const dateStr = t.createdAt 
+                    ? t.createdAt.toDate().toLocaleString('es-MX', { dateStyle: 'short', timeStyle: 'short' }) 
+                    : 'Reciente';
+
+                // Badge de Estado
+                let statusBadge = '';
+                if (t.status === 'estacionado') {
+                    statusBadge = '<span class="status-badge status-estacionado">Lavándose</span>';
+                } else if (t.status === 'solicitado') {
+                    statusBadge = `<span class="status-badge status-solicitado">${t.metodoPago === 'efectivo' ? 'Terminado - Por Pagar' : 'Terminado'}</span>`;
+                } else if (t.status === 'pagado') {
+                    statusBadge = '<span class="status-badge status-pagado">Pagado</span>';
+                } else if (t.status === 'entregado') {
+                    statusBadge = '<span class="status-badge status-entregado">Entregado</span>';
+                }
+
+                // Notas e Tipo de Lavado
+                const noteDisplay = t.notes 
+                    ? (t.notes.length > 50 ? t.notes.substring(0, 50) + '...' : t.notes) 
+                    : '<span style="color: rgba(0,0,0,0.25);">Sin comentarios</span>';
+                
+                const washTypeBadge = `<span class="status-badge status-estacionado" style="font-size: 0.7rem; padding: 2px 8px; margin-bottom: 4px; display: inline-block;">${(t.tipoLavado || 'basico').toUpperCase()}</span>`;
+
+                const brandModelText = (t.brand || t.model || t.modeloAuto)
+                    ? `<span style="display: block; font-size: 0.75rem; color: var(--text-secondary); margin-top: 4px; font-weight: 500;">${[t.brand, t.model || t.modeloAuto].filter(Boolean).join(' ')}</span>`
+                    : '';
+
+                tr.innerHTML = `
+                    <td data-label="Vehículo / Modelo">
+                        <span class="plate-badge">${t.plate}</span>
+                        ${brandModelText}
+                    </td>
+                    <td data-label="Ingreso"><span style="font-size: 0.9rem; color: var(--text-secondary);">${dateStr}</span></td>
+                    <td data-label="Estado">${statusBadge}</td>
+                    <td data-label="Lavado / Notas">
+                        ${washTypeBadge}
+                        <div style="font-size: 0.85rem; color: var(--text-secondary);">${noteDisplay}</div>
+                    </td>
+                    <td data-label="Acción" style="text-align: right;">
+                        <button class="btn btn-secondary btn-detail-trigger" data-id="${t.id}" style="padding: 6px 12px; font-size: 0.8rem; width: 100%; min-height: 36px; justify-content: center;">
+                            Ver Expediente
+                        </button>
+                    </td>
+                `;
+
+                tr.querySelector('.btn-detail-trigger').addEventListener('click', () => {
+                    openDetailModal(t);
+                });
+
+                tableBody.appendChild(tr);
+            });
+        }
+
+        // Abrir Modal de Bóveda Legal con Detalles Completos y 5 Fotos
+        function openDetailModal(ticket) {
+            document.getElementById('modal-detail-plate').textContent = ticket.plate;
+            
+            const brandModelEl = document.getElementById('modal-detail-brand-model');
+            if (brandModelEl) {
+                const parts = [ticket.brand, ticket.model || ticket.modeloAuto].filter(Boolean);
+                if (parts.length > 0) {
+                    brandModelEl.textContent = `${parts.join(' ')} (${(ticket.tipoLavado || 'basico').toUpperCase()})`;
+                    brandModelEl.style.display = 'block';
+                } else {
+                    brandModelEl.textContent = `Lavado: ${(ticket.tipoLavado || 'basico').toUpperCase()}`;
+                    brandModelEl.style.display = 'block';
+                }
+            }
+            
+            const dateStr = ticket.createdAt 
+                ? ticket.createdAt.toDate().toLocaleString('es-MX', { dateStyle: 'medium', timeStyle: 'short' }) 
+                : 'Reciente';
+            document.getElementById('modal-detail-time').textContent = `Ingreso: ${dateStr}`;
+            
+            document.getElementById('modal-detail-notes').textContent = ticket.notes || "Ninguna nota de daños o comentarios al ingreso.";
+            
+            const photosContainer = document.getElementById('modal-detail-photos');
+            photosContainer.innerHTML = '';
+
+            const orderedKeys = ['frente', 'atras', 'izq', 'der', 'techo'];
+            let count = 0;
+
+            orderedKeys.forEach(key => {
+                if (ticket.photos && ticket.photos[key]) {
+                    count++;
+                    const photoDiv = document.createElement('div');
+                    photoDiv.className = 'photo-detail-item';
+                    photoDiv.innerHTML = `
+                        <img src="${ticket.photos[key]}" alt="Foto ${key}">
+                        <div class="photo-label">${key}</div>
+                    `;
+                    
+                    photoDiv.addEventListener('click', () => {
+                        window.open(ticket.photos[key], '_blank');
+                    });
+                    
+                    photosContainer.appendChild(photoDiv);
+                }
+            });
+
+            if (count === 0) {
+                photosContainer.innerHTML = '<div style="grid-column: span 5; text-align: center; color: var(--text-secondary); padding: 20px 0;">No se registraron fotos para este vehículo.</div>';
+            }
+
+            modalDetalle.style.display = 'flex';
+        }
+
+        // --- GESTIÓN DE PERSONAL (LAVADORES) EN TIEMPO REAL ---
+        const valetsTableBody = document.getElementById('valets-table-body');
+        const qValets = query(
+            collection(db, "usuarios"),
+            where("negocioId", "==", negocio)
+        );
+
+        onSnapshot(qValets, (snapshot) => {
+            valetsTableBody.innerHTML = '';
+            
+            if (snapshot.empty) {
+                valetsTableBody.innerHTML = `
+                    <tr>
+                        <td colspan="4" style="text-align: center; color: var(--text-secondary); padding: 20px 0;">
+                            No hay trabajadores registrados.
+                        </td>
+                    </tr>`;
+                return;
+            }
+
+            snapshot.forEach((userDoc) => {
+                const uData = userDoc.data();
+                const uId = userDoc.id;
+                
+                const row = document.createElement('tr');
+                row.style.borderBottom = '1px solid var(--border-color)';
+                
+                const isDueno = uData.rol === 'dueno';
+                const roleBadge = isDueno 
+                    ? '<span class="status-badge status-pagado" style="font-size: 0.7rem; padding: 2px 8px;">Dueño (Admin)</span>' 
+                    : '<span class="status-badge status-estacionado" style="font-size: 0.7rem; padding: 2px 8px;">Lavador</span>';
+                
+                const deleteAction = isDueno 
+                    ? `<span style="font-size: 0.8rem; color: var(--text-secondary); font-style: italic;">Administrador</span>` 
+                    : `<button class="btn btn-secondary btn-delete-valet" data-id="${uId}" style="padding: 6px 12px; font-size: 0.75rem; min-height: 28px; border-color: var(--danger); color: var(--danger);">Eliminar</button>`;
+
+                row.innerHTML = `
+                    <td style="padding: 12px; font-weight: 600; color: var(--text-primary);">${uData.nombre || 'Sin nombre'}</td>
+                    <td style="padding: 12px;">${roleBadge}</td>
+                    <td style="padding: 12px; font-family: monospace; font-size: 0.95rem;">${uData.pin}</td>
+                    <td style="padding: 12px; text-align: right;">${deleteAction}</td>
+                `;
+                valetsTableBody.appendChild(row);
+            });
+
+            // Registrar listeners para botones de eliminar
+            document.querySelectorAll('.btn-delete-valet').forEach(btn => {
+                btn.onclick = async (e) => {
+                    const docId = e.target.getAttribute('data-id');
+                    if (confirm("¿Estás seguro de que deseas eliminar este trabajador? Perderá el acceso de inmediato.")) {
+                        try {
+                            const spinner = document.getElementById('loading-spinner');
+                            spinner.style.display = 'flex';
+                            
+                            await deleteDoc(doc(db, "usuarios", docId));
+                            alert("Trabajador eliminado exitosamente.");
+                        } catch (err) {
+                            console.error("Error al eliminar trabajador:", err);
+                            alert("Error al eliminar el trabajador.");
+                        } finally {
+                            document.getElementById('loading-spinner').style.display = 'none';
+                        }
+                    }
+                };
+            });
+        });
+
+        // Registro de Nuevo Lavador
+        document.getElementById('add-valet-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const name = document.getElementById('valet-name-input').value.trim();
+            const pin = document.getElementById('valet-pin-input').value.trim();
+            
+            if (pin.length < 4 || isNaN(pin)) {
+                alert("El PIN debe tener entre 4 y 6 dígitos numéricos.");
+                return;
+            }
+
+            const spinner = document.getElementById('loading-spinner');
+            spinner.style.display = 'flex';
+
+            try {
+                // Verificar si PIN ya existe en esta sucursal/negocio
+                const qCheck = query(
+                    collection(db, "usuarios"),
+                    where("negocioId", "==", negocio),
+                    where("pin", "==", pin)
+                );
+                const checkSnap = await getDocs(qCheck);
+                
+                if (!checkSnap.empty) {
+                    alert("Este PIN ya está asignado a otro usuario de tu autolavado. Elige uno diferente.");
+                    spinner.style.display = 'none';
+                    return;
+                }
+
+                // Crear el nuevo usuario lavador
+                await addDoc(collection(db, "usuarios"), {
+                    negocioId: negocio,
+                    nombre: name,
+                    pin: pin,
+                    rol: 'lavador',
+                    activo: true,
+                    createdAt: serverTimestamp()
+                });
+
+                document.getElementById('add-valet-form').reset();
+                alert("Lavador registrado exitosamente.");
+            } catch (err) {
+                console.error("Error al registrar lavador:", err);
+                alert("Ocurrió un error al registrar al trabajador.");
+            } finally {
+                spinner.style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html>

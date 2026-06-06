@@ -1,0 +1,101 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "GoWash Firebase Database & Storage Schema",
+  "description": "Especificación de colecciones para Cloud Firestore y estructura de archivos para Firebase Storage del ecosistema GoWash (Car Wash Management SaaS).",
+  "collections": {
+    "negocios": {
+      "description": "Lista de establecimientos B2B clientes del SaaS (autolavados).",
+      "documentId": "ID auto-generado o código personalizado (ej: NEG001 o NEG-5512345678)",
+      "fields": {
+        "nombreEstacionamiento": { "type": "string", "example": "GoWash Centrito" },
+        "direccion": { "type": "string", "example": "Av. Vasconcelos 402, Monterrey, NL" },
+        "plan": { "type": "string", "enum": ["piquin", "jalapeno", "reaper"], "example": "jalapeno" },
+        "paymentLink": { "type": "string", "format": "uri", "example": "https://link.mercadopago.com.mx/..." },
+        "tarifaHora": { "type": "number", "example": 80, "description": "Precio base del lavado estándar" },
+        "telefono": { "type": "string", "example": "+528112345678" },
+        "ubicacionUrl": { "type": "string", "format": "uri", "example": "https://maps.app.goo.gl/..." },
+        "esSotano": { "type": "boolean", "example": false },
+        "inventarioQuimicos": {
+          "type": "array",
+          "items": { "type": "string" },
+          "example": ["Shampoo Espuma Activa", "Cera Carnauba", "Abrillantador de Llantas", "Desengrasante Motor"]
+        },
+        "createdAt": { "type": "timestamp", "description": "Fecha de registro del negocio" }
+      }
+    },
+    "usuarios": {
+      "description": "Personal asociado a los negocios (lavadores y dueños/administradores).",
+      "documentId": "ID auto-generado o UID de Firebase Auth",
+      "fields": {
+        "negocioId": { "type": "string", "description": "Relación con la colección negocios", "example": "NEG-5512345678" },
+        "nombre": { "type": "string", "example": "Carlos Mendoza" },
+        "rol": { "type": "string", "enum": ["lavador", "dueno"], "example": "lavador" },
+        "pin": { "type": "string", "description": "PIN hash o texto plano para acceso rápido", "example": "1234" },
+        "activo": { "type": "boolean", "default": true },
+        "createdAt": { "type": "timestamp" }
+      }
+    },
+    "servicios": {
+      "description": "Control individual de servicio de lavado e inspección de cada vehículo.",
+      "documentId": "ID auto-generado (usado en la URL del ticket de cliente)",
+      "fields": {
+        "negocioId": { "type": "string", "description": "Relación con la colección negocios", "example": "NEG-5512345678" },
+        "plate": { "type": "string", "description": "Placa del vehículo en mayúsculas sin espacios/guiones especiales", "example": "AAA123A" },
+        "brand": { "type": "string", "example": "Porsche" },
+        "model": { "type": "string", "example": "911 GT3" },
+        "notes": { "type": "string", "description": "Reporte de daños preexistentes o notas rápidas", "example": "Tallón en defensa trasera derecha y rin delantero izquierdo rayado." },
+        "tipoLavado": { "type": "string", "enum": ["basico", "premium", "cerámico"], "example": "basico" },
+        "modeloAuto": { "type": "string", "example": "Carrera 911" },
+        "status": {
+          "type": "string",
+          "enum": ["estacionado", "solicitado", "pagado", "entregado"],
+          "description": "Máquina de estados de la operación: estacionado (gris), solicitado (amarillo), pagado (verde) y entregado (archivado)."
+        },
+        "metodoPago": {
+          "type": "string",
+          "enum": ["digital", "efectivo", null],
+          "default": null,
+          "description": "Pasarela seleccionada por el usuario para su auditoría."
+        },
+        "photos": {
+          "type": "object",
+          "description": "URLs públicas de Firebase Storage o strings en Base64 JPEG optimizados como fallback.",
+          "properties": {
+            "frente": { "type": "string", "format": "uri" },
+            "atras": { "type": "string", "format": "uri" },
+            "izq": { "type": "string", "format": "uri" },
+            "der": { "type": "string", "format": "uri" },
+            "techo": { "type": "string", "format": "uri" }
+          }
+        },
+        "createdAt": { "type": "timestamp", "description": "Hora de ingreso del vehículo (usado para el cronómetro del cliente)" },
+        "updatedAt": { "type": "timestamp", "description": "Hora de la última actualización de estado o fotos" }
+      }
+    }
+  },
+  "storage": {
+    "description": "Organización jerárquica de archivos en Firebase Storage.",
+    "structure": {
+      "servicios/": {
+        "description": "Carpeta raíz para archivos adjuntos de servicios.",
+        "{servicioId}/": {
+          "description": "Subcarpeta del servicio usando el ID del documento en Firestore.",
+          "files": [
+            "frente.jpg",
+            "atras.jpg",
+            "izq.jpg",
+            "der.jpg",
+            "techo.jpg"
+          ]
+        }
+      }
+    }
+  },
+  "indexes_required": [
+    {
+      "collection": "servicios",
+      "query": "where('negocioId', '==', X).where('status', '!=', 'entregado')",
+      "description": "Índice compuesto requerido por Firestore para la vista en vivo de la terminal de lavador."
+    }
+  ]
+}

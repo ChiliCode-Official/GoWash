@@ -1,0 +1,1365 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GoWash | Gestión Inteligente de Autolavados por Chili Code</title>
+    <meta name="description" content="El fin de los boletos de papel. Digitaliza tu autolavado con GoWash. Bóveda legal de fotos de inspección, control de efectivo en tiempo real e inventarios.">
+    
+    <!-- Favicon / PWA Icon -->
+    <link rel="icon" type="image/png" href="https://i.imgur.com/seIwnhu.png">
+    <link rel="manifest" href="manifest.json">
+    
+    <!-- Hojas de estilo -->
+    <link rel="stylesheet" href="style.css">
+    
+    <style>
+        /* Estilos específicos de la landing */
+        .fixed-access-btn {
+            position: fixed;
+            top: 24px;
+            right: 24px;
+            z-index: 1000;
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            background: rgba(255, 127, 0, 0.15);
+            border: 1px solid var(--primary);
+            box-shadow: 0 4px 20px rgba(255, 127, 0, 0.2);
+            color: var(--text-primary);
+        }
+        
+        @media (hover: hover) {
+            .fixed-access-btn:hover {
+                background: var(--primary);
+                color: #FFFFFF;
+                box-shadow: 0 6px 24px var(--primary-glow);
+            }
+        }
+
+        .fixed-access-btn:active {
+            transform: scale(0.95);
+        }
+
+        /* Grid background pattern ONLY on landing page */
+        body {
+            background-image: 
+                linear-gradient(rgba(26, 26, 26, 0.015) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(26, 26, 26, 0.015) 1px, transparent 1px),
+                radial-gradient(circle at 10% 20%, rgba(255, 127, 0, 0.06) 0%, transparent 45%),
+                radial-gradient(circle at 90% 80%, rgba(214, 158, 46, 0.04) 0%, transparent 45%);
+            background-size: 45px 45px, 45px 45px, auto, auto;
+            background-attachment: fixed;
+        }
+
+        .hero-section {
+            padding: 80px 16px;
+            position: relative;
+        }
+
+        .hero-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 48px;
+            align-items: center;
+            text-align: left;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        @media (min-width: 960px) {
+            .hero-grid {
+                grid-template-columns: 1.1fr 1.2fr 0.9fr;
+                gap: 32px;
+            }
+        }
+
+        .hero-title {
+            font-size: 3.8rem;
+            margin-bottom: 24px;
+            background: linear-gradient(135deg, var(--text-primary) 50%, var(--primary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            line-height: 1.1;
+        }
+
+        .hero-subtitle {
+            font-size: 1.15rem;
+            margin-bottom: 40px;
+            color: var(--text-secondary);
+            line-height: 1.7;
+        }
+
+        @media (max-width: 600px) {
+            .hero-title {
+                font-size: 2.4rem;
+            }
+            .hero-subtitle {
+                font-size: 1rem;
+            }
+        }
+
+        /* Apple Grid Layout Style */
+        .apple-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+            margin-bottom: 80px;
+            max-width: 1200px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        @media (min-width: 768px) {
+            .apple-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .tile-full {
+                grid-column: span 2;
+            }
+        }
+
+        .apple-tile {
+            background: rgba(0, 0, 0, 0.015);
+            border: 1px solid rgba(0, 0, 0, 0.04);
+            border-radius: 24px;
+            padding: 48px 24px 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            overflow: hidden;
+            position: relative;
+            transition: var(--transition-smooth);
+            min-height: 480px;
+        }
+
+        @media (hover: hover) {
+            .apple-tile:hover {
+                background: rgba(0, 0, 0, 0.03);
+                border-color: rgba(255, 127, 0, 0.15);
+                transform: translateY(-2px);
+            }
+        }
+
+        .tile-header {
+            max-width: 500px;
+            margin-bottom: 24px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .tile-badge {
+            font-size: 0.65rem;
+            color: var(--primary);
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+
+        .tile-title {
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--text-primary);
+            margin-bottom: 12px;
+            line-height: 1.2;
+            font-family: var(--font-title);
+        }
+
+        .tile-subtitle {
+            font-size: 0.95rem;
+            color: var(--text-secondary);
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+
+        .tile-actions-pills {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .tile-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 6px 18px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            border-radius: 20px;
+            text-decoration: none;
+            transition: var(--transition-smooth);
+            min-height: 36px;
+            text-transform: uppercase;
+        }
+
+        .solid-tile-btn {
+            background: var(--primary);
+            color: #FFFFFF;
+            box-shadow: 0 4px 12px var(--primary-glow);
+        }
+
+        @media (hover: hover) {
+            .solid-tile-btn:hover {
+                background: #e06f00;
+                box-shadow: 0 6px 16px var(--primary-glow);
+                transform: translateY(-1px);
+            }
+        }
+
+        .outline-tile-btn {
+            border: 1px solid var(--primary);
+            color: var(--primary);
+            background: transparent;
+        }
+
+        @media (hover: hover) {
+            .outline-tile-btn:hover {
+                background: var(--primary-bg);
+                transform: translateY(-1px);
+            }
+        }
+
+        .tile-image {
+            width: 85%;
+            max-width: 380px;
+            margin-top: auto;
+            border-radius: 16px 16px 0 0;
+            border: 1px solid rgba(0, 0, 0, 0.07);
+            border-bottom: none;
+            object-fit: cover;
+            transition: var(--transition-smooth);
+        }
+
+        .image-full {
+            max-width: 650px;
+            width: 90%;
+        }
+
+        @media (hover: hover) {
+            .apple-tile:hover .tile-image {
+                border-color: rgba(255, 127, 0, 0.2);
+                transform: scale(1.02);
+            }
+        }
+
+        @media (max-width: 600px) {
+            .apple-tile {
+                background: transparent !important;
+                border: none !important;
+                border-bottom: 1px solid rgba(0, 0, 0, 0.08) !important;
+                border-radius: 0 !important;
+                padding: 40px 0 0 !important;
+                min-height: auto !important;
+            }
+            .tile-image {
+                width: 100% !important;
+                max-width: none !important;
+                border-radius: 12px 12px 0 0 !important;
+            }
+        }
+
+        .pricing-section {
+            padding: 60px 0;
+            text-align: center;
+        }
+
+        .pricing-title {
+            font-size: 2.5rem;
+            margin-bottom: 16px;
+        }
+
+        .pricing-subtitle {
+            color: var(--text-secondary);
+            margin-bottom: 48px;
+        }
+
+        .plan-card {
+            padding: 40px 32px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            position: relative;
+            overflow: hidden;
+            background: rgba(0, 0, 0, 0.015);
+            border: 1px solid var(--border-color);
+            border-radius: 24px;
+        }
+
+        .plan-card.featured {
+            border-color: var(--primary);
+            background: rgba(255, 127, 0, 0.03);
+            box-shadow: 0 8px 32px 0 rgba(255, 127, 0, 0.08);
+        }
+
+        .plan-badge {
+            position: absolute;
+            top: 20px;
+            right: -30px;
+            background: var(--primary);
+            color: #FFFFFF;
+            font-size: 0.75rem;
+            font-weight: 700;
+            padding: 4px 30px;
+            transform: rotate(45deg);
+        }
+
+        .plan-name {
+            font-size: 1.75rem;
+            margin-bottom: 8px;
+        }
+
+        .plan-price {
+            font-size: 3rem;
+            font-family: var(--font-title);
+            font-weight: 800;
+            color: var(--text-primary);
+            margin-bottom: 24px;
+        }
+
+        .plan-price span {
+            font-size: 1rem;
+            color: var(--text-secondary);
+            font-weight: 400;
+        }
+
+        .plan-features {
+            list-style: none;
+            text-align: left;
+            margin-bottom: 32px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .plan-features li {
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .plan-features li::before {
+            content: "✓";
+            color: var(--primary);
+            font-weight: bold;
+        }
+
+        /* 3D Showcase Card Styles */
+        .showcase-card {
+            padding: 24px;
+            position: relative;
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border: 1px solid rgba(0, 0, 0, 0.07);
+            border-radius: 24px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+            max-width: 500px;
+            width: 100%;
+            justify-self: center;
+        }
+
+        .showcase-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 12px;
+            gap: 16px;
+        }
+
+        .showcase-badge-new {
+            font-size: 0.65rem;
+            color: var(--primary);
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        .showcase-title {
+            font-size: 1.45rem;
+            font-weight: 800;
+            color: var(--text-primary);
+            font-family: var(--font-title);
+        }
+
+        .showcase-subtitle {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            margin-top: 2px;
+        }
+
+        .brand-badge-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(255, 127, 0, 0.1);
+            color: var(--primary);
+            border: 1px solid rgba(255, 127, 0, 0.2);
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.65rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .pulse-dot {
+            width: 6px;
+            height: 6px;
+            background: var(--primary);
+            border-radius: 50%;
+            display: inline-block;
+            box-shadow: 0 0 8px var(--primary);
+            animation: pulse 1.5s infinite alternate;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 0.4; }
+            100% { opacity: 1; }
+        }
+
+        .btn-pill-neon {
+            background: var(--primary);
+            color: #FFFFFF;
+            font-size: 0.7rem;
+            font-weight: 700;
+            padding: 6px 14px;
+            border-radius: 20px;
+            text-decoration: none;
+            box-shadow: 0 4px 12px var(--primary-glow);
+            transition: var(--transition-smooth);
+            text-transform: uppercase;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            height: 28px;
+            white-space: nowrap;
+        }
+
+        @media (hover: hover) {
+            .btn-pill-neon:hover {
+                box-shadow: 0 6px 18px var(--primary);
+                transform: translateY(-1px);
+            }
+        }
+
+        .btn-pill-neon:active {
+            transform: scale(0.95);
+        }
+
+        .model-container {
+            width: 100%;
+            height: 230px;
+            position: relative;
+            margin: 8px 0;
+            border-radius: 16px;
+            background: radial-gradient(circle at center, rgba(0, 0, 0, 0.015) 0%, transparent 70%);
+        }
+
+        .price-delivery-row {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .detail-label {
+            font-size: 0.65rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        .detail-value {
+            font-family: var(--font-title);
+            font-size: 1.25rem;
+            font-weight: 800;
+            color: var(--text-primary);
+        }
+
+        .specs-row {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            border-top: 1px solid var(--border-color);
+            padding-top: 16px;
+            margin-top: 16px;
+        }
+
+        .spec-item-horizontal {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .spec-icon-box {
+            width: 30px;
+            height: 30px;
+            background: rgba(0, 0, 0, 0.02);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9rem;
+        }
+
+        .spec-val {
+            font-family: var(--font-title);
+            font-weight: 700;
+            color: var(--text-primary);
+            font-size: 0.78rem;
+            line-height: 1.2;
+        }
+
+        .spec-lbl {
+            color: var(--text-secondary);
+            font-size: 0.6rem;
+            line-height: 1.2;
+        }
+
+        @media (max-width: 600px) {
+            .showcase-card {
+                background: transparent !important;
+                border: none !important;
+                box-shadow: none !important;
+                backdrop-filter: none !important;
+                -webkit-backdrop-filter: none !important;
+                padding: 16px 0 !important;
+                border-radius: 0 !important;
+            }
+            .model-container {
+                background: transparent !important;
+                height: 200px;
+            }
+            .price-delivery-row, .specs-row {
+                border-top: 1px solid rgba(0, 0, 0, 0.08) !important;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .specs-row {
+                grid-template-columns: 1fr;
+                gap: 12px;
+            }
+        }
+
+        /* Estilos de la navegación responsive */
+        header.navbar {
+            position: relative;
+            z-index: 1000;
+            background: transparent !important;
+            border: none !important;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05) !important;
+            border-radius: 0 !important;
+            box-shadow: none !important;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 24px 0 !important;
+            margin-bottom: 48px !important;
+            width: 100%;
+        }
+
+        #nav-toggle {
+            display: none;
+            background: transparent;
+            border: none;
+            width: 28px;
+            height: 18px;
+            position: relative;
+            cursor: pointer;
+            outline: none;
+            z-index: 1002;
+            padding: 0;
+        }
+
+        #nav-toggle span {
+            display: block;
+            position: absolute;
+            height: 2px;
+            width: 100%;
+            background: var(--text-primary);
+            border-radius: 2px;
+            opacity: 1;
+            left: 0;
+            transform: rotate(0deg);
+            transition: .25s ease-in-out;
+        }
+
+        #nav-toggle span:nth-child(1) {
+            top: 0px;
+        }
+
+        #nav-toggle span:nth-child(2) {
+            top: 8px;
+        }
+
+        #nav-toggle span:nth-child(3) {
+            top: 16px;
+        }
+
+        #nav-toggle.active span:nth-child(1) {
+            top: 8px;
+            transform: rotate(135deg);
+        }
+
+        #nav-toggle.active span:nth-child(2) {
+            opacity: 0;
+            left: -60px;
+        }
+
+        #nav-toggle.active span:nth-child(3) {
+            top: 8px;
+            transform: rotate(-135deg);
+        }
+
+        .brand-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .nav-menu {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+        }
+
+        .nav-link {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.95rem;
+            font-weight: 600;
+            transition: var(--transition-smooth);
+        }
+
+        .nav-link:hover {
+            color: var(--primary);
+        }
+
+        @media (max-width: 768px) {
+            header.navbar {
+                padding: 16px 0 !important;
+                margin-bottom: 24px !important;
+                border-bottom: 1px solid rgba(0, 0, 0, 0.08) !important;
+            }
+
+            #nav-toggle {
+                display: block !important;
+            }
+
+            .brand-container {
+                position: absolute;
+                left: 50%;
+                transform: translateX(-50%);
+            }
+
+            .nav-menu {
+                display: flex;
+                flex-direction: column;
+                position: absolute;
+                top: 70px;
+                left: 0;
+                right: 0;
+                background: rgba(255, 255, 255, 0.98);
+                backdrop-filter: var(--glass-blur);
+                -webkit-backdrop-filter: var(--glass-blur);
+                border: 1px solid var(--border-color);
+                border-radius: 16px;
+                padding: 24px;
+                gap: 16px;
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+                z-index: 999;
+                opacity: 0;
+                transform: translateY(-10px);
+                pointer-events: none;
+                transition: opacity 0.3s ease, transform 0.3s ease;
+            }
+
+            .nav-menu.active {
+                opacity: 1;
+                transform: translateY(0);
+                pointer-events: auto;
+            }
+
+            .fixed-access-btn {
+                display: none !important;
+            }
+        }
+
+        /* Slider horizontal de planes en móvil (Estilo Apple / Snap Carousel) */
+        @media (max-width: 600px) {
+            .plans-slider {
+                display: flex !important;
+                overflow-x: auto !important;
+                scroll-snap-type: x mandatory !important;
+                gap: 16px !important;
+                padding: 24px 16px !important;
+                margin-left: -16px !important;
+                margin-right: -16px !important;
+                scroll-padding: 16px !important;
+                -webkit-overflow-scrolling: touch !important;
+            }
+            
+            .plans-slider::-webkit-scrollbar {
+                display: none !important;
+            }
+
+            .plans-slider .plan-card {
+                flex: 0 0 280px !important;
+                scroll-snap-align: center !important;
+                background: rgba(255, 255, 255, 0.9) !important;
+                border: 1px solid rgba(0, 0, 0, 0.08) !important;
+                border-radius: 24px !important;
+                box-shadow: 0 12px 32px rgba(0, 0, 0, 0.06) !important;
+                padding: 32px 24px !important;
+                margin-bottom: 0 !important;
+                backdrop-filter: blur(20px) !important;
+                -webkit-backdrop-filter: blur(20px) !important;
+            }
+            
+            .plans-slider .plan-card.featured {
+                border: 2px solid var(--primary) !important;
+                background: rgba(255, 127, 0, 0.03) !important;
+            }
+        }
+
+        /* Estilos de la tabla de comparación de planes */
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+            text-align: left;
+        }
+        .comparison-table th, .comparison-table td {
+            padding: 16px;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 0.95rem;
+        }
+        .comparison-table th {
+            font-family: var(--font-title);
+            font-weight: 700;
+            color: var(--text-primary);
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            letter-spacing: 0.05em;
+        }
+        .comparison-table td {
+            color: var(--text-secondary);
+        }
+        .comparison-table tr:hover td {
+            background: rgba(0, 0, 0, 0.01);
+        }
+
+        /* Hover de botón flotante PWA */
+        @media (hover: hover) {
+            #btn-pwa-floating:hover {
+                background: var(--primary) !important;
+                color: #FFFFFF !important;
+                box-shadow: 0 6px 24px var(--primary-glow) !important;
+            }
+        }
+        #btn-pwa-floating:active {
+            transform: scale(0.95);
+        }
+
+        /* Hover de botón de acceso en cabecera */
+        .header-login-btn {
+            transition: var(--transition-smooth);
+        }
+        @media (hover: hover) {
+            .header-login-btn:hover {
+                background: var(--primary) !important;
+                color: #FFFFFF !important;
+                box-shadow: 0 4px 12px var(--primary-glow) !important;
+            }
+        }
+        .header-login-btn:active {
+            transform: scale(0.95);
+        }
+
+        #mobile-dropdown-login {
+            display: none;
+        }
+        @media (max-width: 768px) {
+            #mobile-dropdown-login {
+                display: block !important;
+            }
+        }
+
+        /* Hero 3D Model Column */
+        .hero-center-model {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 420px;
+        }
+
+        .hero-center-model model-viewer {
+            width: 100%;
+            height: 420px;
+            --poster-color: transparent;
+        }
+
+        @media (max-width: 960px) {
+            .hero-center-model {
+                min-height: 320px;
+            }
+            .hero-center-model model-viewer {
+                height: 320px;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .hero-center-model {
+                min-height: 280px;
+            }
+            .hero-center-model model-viewer {
+                height: 280px;
+            }
+        }
+
+        /* Hero Specs Column (Right side widgets) */
+        .hero-specs-column {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .spec-widget-card {
+            padding: 20px 16px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            gap: 10px;
+            border-radius: 20px !important;
+            background: rgba(255, 255, 255, 0.85) !important;
+            border: 1px solid rgba(0, 0, 0, 0.06) !important;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04) !important;
+            transition: var(--transition-smooth);
+        }
+
+        @media (hover: hover) {
+            .spec-widget-card:hover {
+                transform: translateY(-3px);
+                box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08) !important;
+                border-color: rgba(255, 127, 0, 0.2) !important;
+            }
+        }
+
+        .spec-icon-wrapper {
+            width: 44px;
+            height: 44px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .spec-widget-val {
+            font-family: var(--font-title);
+            font-weight: 800;
+            font-size: 1.05rem;
+            color: var(--text-primary);
+            line-height: 1.2;
+        }
+
+        .spec-widget-lbl {
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-weight: 600;
+        }
+
+        @media (max-width: 600px) {
+            .hero-specs-column {
+                margin-top: 8px;
+            }
+            .spec-widget-card {
+                padding: 16px 12px !important;
+                border-radius: 16px !important;
+                background: rgba(0, 0, 0, 0.02) !important;
+                border: 1px solid rgba(0, 0, 0, 0.06) !important;
+                box-shadow: none !important;
+            }
+        }
+    </style>
+    <!-- Google Model Viewer component for 3D GLB model rendering -->
+    <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.5.0/model-viewer.min.js"></script>
+</head>
+<body>
+
+    <div class="app-container">
+        <!-- Barra de navegación premium (GoWash) -->
+        <header class="navbar animated-fade-in">
+            <!-- Icono de Menú de 3 líneas en el extremo izquierdo -->
+            <button id="nav-toggle" aria-label="Abrir menú">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+            
+            <!-- Logo -->
+            <div class="brand-container">
+                <a href="index.html" style="display: flex; align-items: center; gap: 10px; text-decoration: none;">
+                    <img src="https://i.imgur.com/seIwnhu.png" alt="GoWash Logo" style="height: 36px; object-fit: contain;">
+                    <span style="font-size: 1.35rem; letter-spacing: 0.1em; font-weight: 800; font-family: var(--font-title); color: var(--text-primary);">GoWash</span>
+                </a>
+            </div>
+
+            <!-- Contenedor agrupador para menú y botón de acceso -->
+            <div style="display: flex; align-items: center; gap: 24px;">
+                <!-- Menú/Links a la derecha -->
+                <nav class="nav-menu" id="nav-menu">
+                    <a href="index.html" class="nav-link" style="font-size: 0.85rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;">Inicio</a>
+                    <a href="#planes" class="nav-link" style="font-size: 0.85rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;">Planes</a>
+                    <a href="#" id="btn-pwa-install" class="nav-link" style="display: none; font-size: 0.85rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--primary); align-items: center; gap: 6px;">
+                        <span>📲</span> Instalar App
+                    </a>
+                    <!-- Enlace de login en el menú desplegable de móvil -->
+                    <a href="login.html" class="nav-link" style="font-size: 0.85rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--primary);" id="mobile-dropdown-login">Panel de Acceso</a>
+                </nav>
+
+                <!-- Botón de acceso directo visible en la barra superior en móvil y desktop -->
+                <a href="login.html" class="btn header-login-btn" style="color: var(--text-primary); font-weight: 700; border: 1px solid var(--primary); background: rgba(255, 127, 0, 0.1); padding: 8px 16px; font-size: 0.8rem; min-height: 36px; border-radius: 20px; display: inline-flex; align-items: center; gap: 6px; text-decoration: none; z-index: 1001;">
+                    <img src="https://i.imgur.com/seIwnhu.png" alt="GoWash Logo" style="height: 18px; object-fit: contain;">
+                    <span>ACCESO</span>
+                </a>
+            </div>
+        </header>
+
+        <!-- Sección Hero con Grid e Integración del Modelo 3D de Porsche (Vertical / Diseño Premium) -->
+        <section class="hero-section animated-fade-in">
+            <div class="hero-grid">
+                <!-- Columna Izquierda: Mensaje principal y CTAs -->
+                <div class="hero-text" style="display: flex; flex-direction: column; align-items: flex-start; text-align: left;">
+                    <span style="display: inline-block; background: #1A1A1A; color: #FFFFFF; border-radius: 20px; font-weight: 700; font-size: 0.65rem; text-transform: uppercase; padding: 4px 10px; letter-spacing: 0.05em; margin-bottom: 16px;">
+                        Car Wash SaaS
+                    </span>
+                    <h2 style="font-size: 3rem; font-weight: 400; color: var(--text-primary); margin-bottom: 2px; font-family: var(--font-title); line-height: 1.1; letter-spacing: 0.05em;">GoWash</h2>
+                    <h1 style="font-size: 4.5rem; font-weight: 800; color: var(--primary); margin-bottom: 24px; font-family: var(--font-title); line-height: 1.0; letter-spacing: -0.02em;">DIGITAL</h1>
+                    
+                    <p class="hero-subtitle" style="margin-bottom: 32px; font-size: 0.95rem; color: var(--text-secondary); line-height: 1.6; max-width: 380px;">
+                        Dile adiós a los boletos de papel. Optimiza tiempos de lavado, controla insumos químicos y digitaliza cobros en tiempo real.
+                    </p>
+                    
+                    <div style="font-family: var(--font-body); font-size: 1rem; color: var(--text-secondary); margin-bottom: 32px;">
+                        Desde* <span style="color: var(--text-primary); font-weight: 700;">$0 MXN</span>
+                    </div>
+
+                    <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+                        <!-- Botón principal configurado -->
+                        <a href="#planes" id="btn-hero-planes" class="btn btn-primary" style="border-radius: 30px; padding: 10px 24px; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; display: inline-flex; align-items: center; gap: 8px;">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 2px;">
+                                <line x1="4" y1="21" x2="4" y2="14"></line>
+                                <line x1="4" y1="10" x2="4" y2="3"></line>
+                                <line x1="12" y1="21" x2="12" y2="12"></line>
+                                <line x1="12" y1="8" x2="12" y2="3"></line>
+                                <line x1="20" y1="21" x2="20" y2="16"></line>
+                                <line x1="20" y1="12" x2="20" y2="3"></line>
+                                <line x1="1" y1="14" x2="7" y2="14"></line>
+                                <line x1="9" y1="8" x2="15" y2="8"></line>
+                                <line x1="17" y1="16" x2="23" y2="16"></line>
+                            </svg>
+                            <span>VER PLANES</span>
+                        </a>
+                        
+                        <!-- Botón PWA negro circular al lado -->
+                        <button id="btn-hero-pwa-install" class="btn" style="width: 44px; height: 44px; min-height: 44px; border-radius: 50%; background: var(--text-primary); border: none; display: none; align-items: center; justify-content: center; padding: 0; color: #FFFFFF; transition: var(--transition-smooth);" title="Instalar App">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="1" y="5" width="22" height="14" rx="7" ry="7"></rect>
+                                <circle cx="16" cy="12" r="3" fill="currentColor"></circle>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Columna Central: Porsche 911 GT3 3D Showcase -->
+                <div class="hero-center-model">
+                    <model-viewer
+                        src="https://raw.githubusercontent.com/ChiliCode-Official/mis-modelos-3d-v2-0/main/porsche_911_gt3.glb"
+                        alt="Porsche 911 GT3"
+                        camera-orbit="-35deg 75deg auto"
+                        camera-controls
+                        auto-rotate
+                        interaction-prompt="none"
+                        shadow-intensity="1.5"
+                        environment-image="neutral"
+                        aria-label="Porsche 911 GT3 3D model">
+                    </model-viewer>
+                </div>
+
+                <!-- Columna Derecha: Tarjetas de Especificaciones -->
+                <div class="hero-specs-column">
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px;">
+                        <!-- Especificación 1: Inspección -->
+                        <div class="glass-panel spec-widget-card">
+                            <div class="spec-icon-wrapper" style="color: var(--primary); background: rgba(255, 127, 0, 0.1); border: 1px solid rgba(255, 127, 0, 0.2);">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                                </svg>
+                            </div>
+                            <div class="spec-widget-val">5 Fotos</div>
+                            <div class="spec-widget-lbl">Inspección</div>
+                        </div>
+
+                        <!-- Especificación 2: Lavado -->
+                        <div class="glass-panel spec-widget-card">
+                            <div class="spec-icon-wrapper" style="color: var(--warning); background: rgba(214, 158, 46, 0.1); border: 1px solid rgba(214, 158, 46, 0.2);">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="12" cy="12" r="10"></circle>
+                                    <polyline points="12 6 12 12 16 14"></polyline>
+                                </svg>
+                            </div>
+                            <div class="spec-widget-val">Rápido</div>
+                            <div class="spec-widget-lbl">Lavado</div>
+                        </div>
+
+                        <!-- Especificación 3: Boleto QR -->
+                        <div class="glass-panel spec-widget-card">
+                            <div class="spec-icon-wrapper" style="color: #8A8DFF; background: rgba(138, 141, 255, 0.1); border: 1px solid rgba(138, 141, 255, 0.2);">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect>
+                                    <line x1="12" y1="18" x2="12.01" y2="18"></line>
+                                </svg>
+                            </div>
+                            <div class="spec-widget-val">QR Digital</div>
+                            <div class="spec-widget-lbl">Boleto</div>
+                        </div>
+
+                        <!-- Especificación 4: Caja -->
+                        <div class="glass-panel spec-widget-card">
+                            <div class="spec-icon-wrapper" style="color: #00E5FF; background: rgba(0, 229, 255, 0.1); border: 1px solid rgba(0, 229, 255, 0.2);">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect>
+                                    <line x1="1" y1="10" x2="23" y2="10"></line>
+                                </svg>
+                            </div>
+                            <div class="spec-widget-val">Stripe/Cash</div>
+                            <div class="spec-widget-lbl">Caja</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Características (Estilo Apple Grid Layout) -->
+        <section class="features-grid apple-grid">
+            <!-- Feature 1: Bóveda Legal -->
+            <div class="apple-tile animated-fade-in">
+                <div class="tile-header">
+                    <span class="tile-badge">Módulo de Seguridad</span>
+                    <h3 class="tile-title">Bóveda Legal</h3>
+                    <p class="tile-subtitle">Captura 5 fotos obligatorias de cada vehículo al recibirlo. Cero reclamos injustos por tallones o golpes.</p>
+                    <div class="tile-actions-pills">
+                        <a href="login.html" class="tile-btn solid-tile-btn">Probar Demo</a>
+                        <a href="#planes" class="tile-btn outline-tile-btn">Ver Planes</a>
+                    </div>
+                </div>
+                <img src="https://i.imgur.com/EuwlxIE.png" alt="Bóveda Legal" class="tile-image">
+            </div>
+            
+            <!-- Feature 2: Cero Esperas -->
+            <div class="apple-tile animated-fade-in">
+                <div class="tile-header">
+                    <span class="tile-badge">Cliente Digital</span>
+                    <h3 class="tile-title">Control de Servicio</h3>
+                    <p class="tile-subtitle">El cliente escanea su boleto QR, ve el progreso del lavado y solicita la entrega de su auto en un clic.</p>
+                    <div class="tile-actions-pills">
+                        <a href="login.html" class="tile-btn solid-tile-btn">Probar Demo</a>
+                        <a href="#planes" class="tile-btn outline-tile-btn">Saber Más</a>
+                    </div>
+                </div>
+                <img src="https://i.imgur.com/BBCW5Rx.png" alt="Control de Servicio" class="tile-image">
+            </div>
+            
+            <!-- Feature 3: Auditoría y Enlaces (Full-Width Tile) -->
+            <div class="apple-tile tile-full animated-fade-in">
+                <div class="tile-header">
+                    <span class="tile-badge">Administración y Pagos</span>
+                    <h3 class="tile-title">Auditoría, Insumos y Enlaces</h3>
+                    <p class="tile-subtitle">Control de efectivo, inventario de insumos químicos en tiempo real y cobros digitales vinculados directamente a tus enlaces de Mercado Pago. Cuadra tus cuentas al centavo.</p>
+                    <div class="tile-actions-pills">
+                        <a href="login.html" class="tile-btn solid-tile-btn">Vincular Enlaces</a>
+                        <a href="#planes" class="tile-btn outline-tile-btn">Ver Tarifas</a>
+                    </div>
+                </div>
+                <img src="https://i.imgur.com/AJR7gmg.png" alt="Auditoría y Mercado Pago" class="tile-image image-full">
+            </div>
+        </section>
+
+        <!-- Planes de Precios -->
+        <section id="planes" class="pricing-section">
+            <h2 class="pricing-title">Planes para cada Autolavado</h2>
+            <p class="pricing-subtitle">Escala la administración y cobros de tu negocio con tarifas simples y transparentes.</p>
+            
+            <div class="grid-3 plans-slider">
+                <!-- Plan Piquín -->
+                <div class="glass-panel plan-card animated-fade-in">
+                    <div>
+                        <h3 class="plan-name">Piquín</h3>
+                        <p style="margin-bottom: 20px;">Ideal para comenzar y probar la plataforma digital.</p>
+                        <div class="plan-price">$0 <span>(Gratis)</span></div>
+                        <ul class="plan-features">
+                          <li>Hasta 50 servicios al mes</li>
+                          <li>Boleto QR Digital básico</li>
+                          <li>Soporte vía email</li>
+                          <li>Bypass de almacenamiento nativo</li>
+                        </ul>
+                    </div>
+                    <a href="registro.html" id="btn-plan-piquin" class="btn btn-primary" style="width: 100%;">Comenzar Ahora</a>
+                </div>
+
+                <!-- Plan Jalapeño -->
+                <div class="glass-panel plan-card featured animated-fade-in">
+                    <div class="plan-badge">POPULAR</div>
+                    <div>
+                        <h3 class="plan-name">Jalapeño</h3>
+                        <p style="margin-bottom: 20px;">Perfecto para autolavados de alta afluencia y detailers.</p>
+                        <div class="plan-price">$2,999 <span>MXN / mes</span></div>
+                        <ul class="plan-features">
+                            <li>Servicios mensuales ilimitados</li>
+                            <li>Bóveda Legal (5 fotos por auto)</li>
+                            <li>Alertas en tiempo real</li>
+                            <li>Dashboard de administración</li>
+                            <li>Inventario de químicos</li>
+                            <li>Soporte prioritario 24/7</li>
+                        </ul>
+                    </div>
+                    <a href="https://wa.me/525574123521?text=Hola%20Chili%20Code,%20me%20interesa%20contratar%20el%20Plan%20Jalape%C3%B1o%20de%20GoWash%20($2,999%20MXN/mes)%20para%20mi%20autolavado." id="btn-plan-jalapeno" class="btn btn-primary">Elegir Jalapeño</a>
+                </div>
+
+                <!-- Plan Reaper -->
+                <div class="glass-panel plan-card animated-fade-in">
+                    <div>
+                        <h3 class="plan-name">Reaper</h3>
+                        <p style="margin-bottom: 20px;">Diseñado para franquicias, cadenas multi-sucursal o marca blanca.</p>
+                        <div class="plan-price">$3,499 <span>MXN / mes</span></div>
+                        <ul class="plan-features">
+                            <li>Multi-sucursal centralizado</li>
+                            <li>Marca Blanca y personalización</li>
+                            <li>Pasarela de pagos Stripe integrada</li>
+                            <li>Bóveda legal en la nube redundante</li>
+                            <li>Gerente de cuenta dedicado</li>
+                        </ul>
+                    </div>
+                    <a href="https://wa.me/525574123521?text=Hola%20Chili%20Code,%20necesito%20infraestructura%20Multi-Sucursal%20y%20Marca%20Blanca.%20Quiero%20informaci%C3%B3n%20del%20Plan%20Reaper%20de%20GoWash." id="btn-plan-reaper" class="btn btn-secondary">Contactar Ventas</a>
+                </div>
+            </div>
+
+            <!-- Botón para mostrar tabla de comparación -->
+            <div style="margin-top: 40px; display: flex; flex-direction: column; align-items: center; gap: 16px;">
+                <button id="btn-compare-toggle" class="btn btn-secondary">Comparar todos los planes ▾</button>
+                <button id="btn-planes-pwa-install" class="btn btn-outline-primary" style="display: none; border-radius: 20px; font-size: 0.85rem; padding: 8px 20px; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 700; align-items: center; gap: 8px; min-height: 36px;">
+                    📲 Instalar App (PWA)
+                </button>
+            </div>
+            
+            <!-- Tabla de comparación colapsable -->
+            <div id="compare-table-container" style="display: none; max-width: 900px; margin: 30px auto; padding: 24px;" class="glass-panel animated-fade-in">
+                <p style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 20px; text-align: left;">
+                    * Todas las solicitudes e integraciones de planes se realizan bajo asesoría directa vía WhatsApp para un onboarding manual de alta fidelidad.
+                </p>
+                <div style="overflow-x: auto;">
+                    <table class="comparison-table" style="width: 100%; border-collapse: collapse; text-align: left;">
+                        <thead>
+                            <tr style="border-bottom: 1px solid var(--border-color);">
+                                <th style="padding: 16px; color: var(--text-secondary); font-size: 0.85rem; text-transform: uppercase;">Característica</th>
+                                <th style="padding: 16px; font-family: var(--font-title); font-weight: 700;">Piquín</th>
+                                <th style="padding: 16px; font-family: var(--font-title); font-weight: 700; color: var(--primary);">Jalapeño</th>
+                                <th style="padding: 16px; font-family: var(--font-title); font-weight: 700;">Reaper</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr style="border-bottom: 1px solid var(--border-color);">
+                                <td style="padding: 16px; font-weight: 600; color: var(--text-primary);">Precio mensual</td>
+                                <td style="padding: 16px; color: var(--text-secondary);">$0 MXN (Prueba)</td>
+                                <td style="padding: 16px; color: var(--primary); font-weight: 700;">$2,999 MXN</td>
+                                <td style="padding: 16px; color: var(--text-secondary); font-weight: 700;">$3,499 MXN</td>
+                            </tr>
+                            <tr style="border-bottom: 1px solid var(--border-color);">
+                                <td style="padding: 16px; font-weight: 600; color: var(--text-primary);">Servicios al mes</td>
+                                <td style="padding: 16px; color: var(--text-secondary);">Hasta 50</td>
+                                <td style="padding: 16px; color: var(--text-secondary);">Ilimitados</td>
+                                <td style="padding: 16px; color: var(--text-secondary);">Ilimitados</td>
+                            </tr>
+                            <tr style="border-bottom: 1px solid var(--border-color);">
+                                <td style="padding: 16px; font-weight: 600; color: var(--text-primary);">Inspección fotográfica</td>
+                                <td style="padding: 16px; color: var(--text-secondary);">Básica</td>
+                                <td style="padding: 16px; color: var(--primary); font-weight: bold;">Bóveda Legal (5 fotos)</td>
+                                <td style="padding: 16px; color: var(--primary); font-weight: bold;">Bóveda Legal (5 fotos)</td>
+                            </tr>
+                            <tr style="border-bottom: 1px solid var(--border-color);">
+                                <td style="padding: 16px; font-weight: 600; color: var(--text-primary);">Boleto QR Digital</td>
+                                <td style="padding: 16px; color: var(--primary);">✓</td>
+                                <td style="padding: 16px; color: var(--primary);">✓</td>
+                                <td style="padding: 16px; color: var(--primary);">✓</td>
+                            </tr>
+                            <tr style="border-bottom: 1px solid var(--border-color);">
+                                <td style="padding: 16px; font-weight: 600; color: var(--text-primary);">Dashboard y Caja</td>
+                                <td style="padding: 16px; color: var(--text-secondary);">Básico</td>
+                                <td style="padding: 16px; color: var(--primary);">✓</td>
+                                <td style="padding: 16px; color: var(--primary);">✓</td>
+                            </tr>
+                            <tr style="border-bottom: 1px solid var(--border-color);">
+                                <td style="padding: 16px; font-weight: 600; color: var(--text-primary);">Inventario de Químicos</td>
+                                <td style="padding: 16px; color: var(--text-secondary); opacity: 0.3;">—</td>
+                                <td style="padding: 16px; color: var(--primary);">✓</td>
+                                <td style="padding: 16px; color: var(--primary);">✓</td>
+                            </tr>
+                            <tr style="border-bottom: 1px solid var(--border-color);">
+                                <td style="padding: 16px; font-weight: 600; color: var(--text-primary);">Soporte técnico</td>
+                                <td style="padding: 16px; color: var(--text-secondary);">Email</td>
+                                <td style="padding: 16px; color: var(--text-secondary);">Prioritario 24/7</td>
+                                <td style="padding: 16px; color: var(--primary); font-weight: 700;">Gerente dedicado</td>
+                            </tr>
+                            <tr style="border-bottom: 1px solid var(--border-color);">
+                                <td style="padding: 16px; font-weight: 600; color: var(--text-primary);">Marca Blanca</td>
+                                <td style="padding: 16px; color: var(--text-secondary); opacity: 0.3;">—</td>
+                                <td style="padding: 16px; color: var(--text-secondary); opacity: 0.3;">—</td>
+                                <td style="padding: 16px; color: var(--primary);">✓</td>
+                            </tr>
+                            <tr style="border-bottom: 1px solid var(--border-color);">
+                                <td style="padding: 16px; font-weight: 600; color: var(--text-primary);">Multi-sucursal</td>
+                                <td style="padding: 16px; color: var(--text-secondary); opacity: 0.3;">—</td>
+                                <td style="padding: 16px; color: var(--text-secondary); opacity: 0.3;">—</td>
+                                <td style="padding: 16px; color: var(--primary);">✓</td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 16px; font-weight: 600; color: var(--text-primary);">Onboarding / Contratación</td>
+                                <td style="padding: 16px;">
+                                    <a href="registro.html" class="tile-btn outline-tile-btn" style="padding: 4px 12px; font-size: 0.7rem; min-height: 28px; display: inline-flex; justify-content: center; align-items: center; text-decoration: none;">Prueba Gratis</a>
+                                </td>
+                                <td style="padding: 16px;">
+                                    <a href="https://wa.me/525574123521?text=Hola%20Chili%20Code,%20me%20interesa%20contratar%20el%20Plan%20Jalape%C3%B1o%20de%20GoWash%20($2,999%20MXN/mes)%20para%20mi%20autolavado." class="tile-btn solid-tile-btn" style="padding: 4px 12px; font-size: 0.7rem; min-height: 28px; display: inline-flex; justify-content: center; align-items: center; text-decoration: none;">Contratar</a>
+                                </td>
+                                <td style="padding: 16px;">
+                                    <a href="https://wa.me/525574123521?text=Hola%20Chili%20Code,%20necesito%20infraestructura%20Multi-Sucursal%20y%20Marca%20Blanca.%20Quiero%20informaci%C3%B3n%20del%20Plan%20Reaper%20de%20GoWash." class="tile-btn outline-tile-btn" style="padding: 4px 12px; font-size: 0.7rem; min-height: 28px; display: inline-flex; justify-content: center; align-items: center; text-decoration: none;">Contactar</a>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer style="margin-top: 100px; padding: 40px 0; text-align: center; border-top: 1px solid var(--border-color); display: flex; flex-direction: column; gap: 12px; align-items: center;">
+            <p>© 2026 GoWash por Chili Code. Todos los derechos reservados. Todos los precios están expresados en Pesos Mexicanos (MXN).</p>
+            <p style="font-size: 0.85rem; color: var(--text-secondary); max-width: 650px; line-height: 1.5; padding: 0 16px;">
+                GoWash es un ecosistema B2B exclusivo de alto contacto. No implementamos pasarelas de pago automatizadas para la activación de planes: el registro, configuración e integración de cada autolavado se gestiona de forma personalizada directamente con el equipo fundador.
+            </p>
+            <div style="font-size: 0.85rem; margin-top: 10px;">
+                <a href="terminos.html" style="color: var(--text-secondary); text-decoration: none; margin: 0 10px;">Términos de Uso</a> | 
+                <a href="privacidad.html" style="color: var(--text-secondary); text-decoration: none; margin: 0 10px;">Aviso de Privacidad</a>
+            </div>
+            <div style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 16px; display: inline-flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                <span>Una submarca de</span>
+                <a href="https://chilicode-official.github.io/ChiliCode/" target="_blank" style="display: inline-flex; align-items: center; gap: 6px; text-decoration: none; color: var(--text-primary); font-weight: 700;">
+                    <img src="https://i.imgur.com/h3CpChF.png" alt="Chili Code" style="height: 18px; object-fit: contain;">
+                    <span>Chili Code</span>
+                </a>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Script para menú responsivo (Hamburguesa) -->
+    <script>
+        const navToggle = document.getElementById('nav-toggle');
+        const navMenu = document.getElementById('nav-menu');
+
+        navToggle.addEventListener('click', () => {
+            navMenu.classList.toggle('active');
+            navToggle.classList.toggle('active');
+        });
+
+        // Cerrar menú al hacer clic en un enlace
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', () => {
+                navMenu.classList.remove('active');
+                navToggle.classList.remove('active');
+            });
+        });
+
+        // Toggle para la tabla de comparación de planes
+        const compareToggleBtn = document.getElementById('btn-compare-toggle');
+        const compareTableContainer = document.getElementById('compare-table-container');
+
+        if (compareToggleBtn && compareTableContainer) {
+            compareToggleBtn.addEventListener('click', () => {
+                const isHidden = compareTableContainer.style.display === 'none';
+                if (isHidden) {
+                    compareTableContainer.style.display = 'block';
+                    compareToggleBtn.textContent = 'Ocultar comparación ▲';
+                } else {
+                    compareTableContainer.style.display = 'none';
+                    compareToggleBtn.textContent = 'Comparar todos los planes ▾';
+                }
+            });
+        }
+
+        // --- Lógica de PWA (Instalación y Service Worker) ---
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js')
+                    .then(reg => console.log('Service Worker registrado con éxito:', reg.scope))
+                    .catch(err => console.error('Error al registrar el Service Worker:', err));
+            });
+        }
+
+        let deferredPrompt;
+        const pwaButtons = [
+            document.getElementById('btn-pwa-floating'),
+            document.getElementById('btn-pwa-install'),
+            document.getElementById('btn-hero-pwa-install'),
+            document.getElementById('btn-planes-pwa-install')
+        ].filter(btn => btn !== null);
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            pwaButtons.forEach(btn => {
+                btn.style.display = 'inline-flex';
+            });
+        });
+
+        const handleInstallClick = async (e) => {
+            if (e) e.preventDefault();
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                console.log('User response to PWA prompt:', outcome);
+                deferredPrompt = null;
+                pwaButtons.forEach(btn => btn.style.display = 'none');
+            }
+        };
+
+        pwaButtons.forEach(btn => btn.addEventListener('click', handleInstallClick));
+
+        window.addEventListener('appinstalled', () => {
+            console.log('PWA GoWash instalada con éxito.');
+            pwaButtons.forEach(btn => btn.style.display = 'none');
+        });
+    </script>
+    
+    <!-- Botón flotante PWA Install -->
+    <button id="btn-pwa-floating" class="btn animated-fade-in" style="position: fixed; bottom: 24px; left: 24px; z-index: 1000; display: none; align-items: center; gap: 8px; backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); background: rgba(255, 127, 0, 0.15); border: 1px solid var(--primary); box-shadow: 0 4px 20px rgba(255, 127, 0, 0.2); color: var(--text-primary); font-weight: 600;">
+        <span>📲</span> Instalar App
+    </button>
+</body>
+</html>
