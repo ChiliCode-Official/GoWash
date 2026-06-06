@@ -385,6 +385,11 @@
     <!-- Contenedor principal -->
     <div class="app-container">
         
+        <!-- Banner de Advertencia de Sótano (Estilo GoWash) -->
+        <div id="sotano-warning-banner" style="display: none; background: var(--warning-bg); border: 1.5px solid var(--warning); border-radius: 16px; padding: 16px; margin-bottom: 24px; color: var(--warning); font-family: var(--font-title); font-weight: 700; font-size: 0.95rem; text-align: center;">
+            ⚠️ MODO SÓTANO ACTIVO: El establecimiento tiene señal limitada; el tiempo y estatus en vivo pueden tardar en actualizarse.
+        </div>
+        
         <!-- Header -->
         <header class="navbar glass-panel dashboard-header">
             <div class="header-brand">
@@ -443,29 +448,13 @@
                     <label for="payment-link-input" class="form-label">Link de Cobro Mercado Pago</label>
                     <input type="url" id="payment-link-input" class="form-control" placeholder="https://link.mercadopago.com.mx/..." autocomplete="off">
                 </div>
-                <div class="form-group" style="margin-bottom: 0;">
-                    <label for="tarifa-input" class="form-label">Tarifa de Lavado Base (MXN)</label>
-                    <input type="number" id="tarifa-input" class="form-control" placeholder="80" min="0" autocomplete="off">
-                </div>
-                <div class="form-group" style="margin-bottom: 0;">
+                <div class="form-group" style="margin-bottom: 0; grid-column: span 2;">
                     <label for="phone-input" class="form-label">Teléfono del Negocio</label>
                     <input type="tel" id="phone-input" class="form-control" placeholder="+52 81 1234 5678" autocomplete="off">
                 </div>
                 <div class="form-group" style="grid-column: span 2; flex-direction: row; align-items: center; gap: 12px; margin-top: 10px; margin-bottom: 0;">
                     <input type="checkbox" id="sotano-checkbox" style="width: 20px; height: 20px; accent-color: var(--primary); cursor: pointer;">
                     <label for="sotano-checkbox" class="form-label" style="margin-bottom: 0; cursor: pointer; text-transform: none;">¿Establecimiento en Sótano / Conectividad Limitada?</label>
-                </div>
-                
-                <!-- Inventario de químicos -->
-                <div class="form-group" style="grid-column: span 2; margin-top: 16px; border-top: 1px solid var(--border-color); padding-top: 16px;">
-                    <label class="form-label">🧪 Control de Insumos Químicos</label>
-                    <div style="display: flex; gap: 12px; margin-bottom: 12px;">
-                        <input type="text" id="chem-input" class="form-control" placeholder="Ej. Shampoo Autolavado" style="min-height: 40px; padding: 8px 12px;" autocomplete="off">
-                        <button type="button" id="btn-add-chem" class="btn btn-primary" style="min-height: 40px; padding: 8px 20px; font-size: 0.85rem;">+ Agregar</button>
-                    </div>
-                    <div id="chem-list-container" style="padding: 12px 16px; border: 1px solid var(--border-color); border-radius: 12px; min-height: 50px; background: rgba(0,0,0,0.01);">
-                        <!-- Chemical list generated dynamically -->
-                    </div>
                 </div>
 
                 <!-- Gestión de Paquetes -->
@@ -624,9 +613,20 @@
             </div>
 
             <!-- Fotos de inspección en alta calidad -->
-            <label class="form-label">Fotografías Obligatorias de Inspección (5 Ángulos)</label>
-            <div class="photos-grid-detail" id="modal-detail-photos">
-                <!-- Inyectadas por JS -->
+            <div style="margin-bottom: 24px;">
+                <label class="form-label">Fotografías Obligatorias de Inspección (5 Ángulos)</label>
+                <div class="photos-grid-detail" id="modal-detail-photos" style="margin-top: 10px;">
+                    <!-- Inyectadas por JS -->
+                </div>
+            </div>
+
+            <!-- Centro de Acciones (Cobrar / Entregar) -->
+            <div style="border-top: 1px solid var(--border-color); padding-top: 20px; margin-top: 24px;">
+                <label class="form-label" style="margin-bottom: 12px; display: block;">Acciones de Operación</label>
+                <div style="display: flex; gap: 12px;" id="modal-actions-container">
+                    <button class="btn btn-primary" id="btn-modal-charge" style="flex: 1; padding: 12px;">Validar Pago</button>
+                    <button class="btn btn-danger" id="btn-modal-deliver" style="flex: 1; padding: 12px; background-color: var(--primary); border-color: var(--primary);">Entregar Auto</button>
+                </div>
             </div>
         </div>
     </div>
@@ -645,6 +645,7 @@
             addDoc,
             deleteDoc,
             getDocs,
+            updateDoc,
             serverTimestamp
         } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
@@ -672,25 +673,16 @@
                     const sData = docSnap.data();
                     if (sData.nombreEstacionamiento) document.getElementById('brand-name-input').value = sData.nombreEstacionamiento;
                     if (sData.paymentLink) document.getElementById('payment-link-input').value = sData.paymentLink;
-                    if (sData.tarifaHora !== undefined) {
-                        tarifaHora = Number(sData.tarifaHora);
-                        document.getElementById('tarifa-input').value = tarifaHora;
-                    } else {
-                        document.getElementById('tarifa-input').value = 80;
-                    }
                     if (sData.telefono) document.getElementById('phone-input').value = sData.telefono;
                     if (sData.linkMaps) document.getElementById('maps-share-link').value = sData.linkMaps;
-                    if (sData.esSotano !== undefined) document.getElementById('sotano-checkbox').checked = sData.esSotano;
-                    
-                    // Cargar inventario químicos
-                    chemicalsInventory = sData.inventarioQuimicos || [];
-                    renderChemicalsList();
+                    if (sData.esSotano !== undefined) {
+                        document.getElementById('sotano-checkbox').checked = sData.esSotano;
+                        document.getElementById('sotano-warning-banner').style.display = sData.esSotano ? 'block' : 'none';
+                    }
 
                     // Cargar paquetes
                     packagesList = sData.paquetesDisponibles || [];
                     renderPackagesList();
-                } else {
-                    document.getElementById('tarifa-input').value = 80;
                 }
                 updateMetrics();
             } catch (err) {
@@ -698,36 +690,6 @@
             }
         }
         loadNegocioConfig();
-
-        // Control y Render de Químicos
-        function renderChemicalsList() {
-            const container = document.getElementById('chem-list-container');
-            container.innerHTML = '';
-            if (chemicalsInventory.length === 0) {
-                container.innerHTML = '<span style="color: var(--text-secondary); font-size: 0.85rem;">Ningún químico registrado en inventario.</span>';
-                return;
-            }
-            chemicalsInventory.forEach((chem, idx) => {
-                const tag = document.createElement('span');
-                tag.className = 'chem-tag';
-                tag.innerHTML = `${chem} <button type="button" data-index="${idx}">&times;</button>`;
-                tag.querySelector('button').onclick = (e) => {
-                    const i = Number(e.target.getAttribute('data-index'));
-                    chemicalsInventory.splice(i, 1);
-                    renderChemicalsList();
-                };
-                container.appendChild(tag);
-            });
-        }
-
-        document.getElementById('btn-add-chem').onclick = () => {
-            const val = document.getElementById('chem-input').value.trim();
-            if (val && !chemicalsInventory.includes(val)) {
-                chemicalsInventory.push(val);
-                document.getElementById('chem-input').value = '';
-                renderChemicalsList();
-            }
-        };
 
         // Control y Render de Paquetes
         function renderPackagesList() {
@@ -787,16 +749,9 @@
         document.getElementById('btn-save-config').addEventListener('click', async () => {
             const nombreEstacionamiento = document.getElementById('brand-name-input').value.trim();
             const paymentLink = document.getElementById('payment-link-input').value.trim();
-            const tarifaInput = document.getElementById('tarifa-input').value.trim();
             const telefono = document.getElementById('phone-input').value.trim();
             const esSotano = document.getElementById('sotano-checkbox').checked;
 
-            if (tarifaInput === "" || isNaN(tarifaInput) || Number(tarifaInput) < 0) {
-                alert("Por favor ingresa una tarifa válida (mayor o igual a 0).");
-                return;
-            }
-
-            const parsedTarifa = Number(tarifaInput);
             const spinner = document.getElementById('loading-spinner');
             spinner.style.display = 'flex';
 
@@ -804,14 +759,11 @@
                 await setDoc(negocioDocRef, {
                     nombreEstacionamiento: nombreEstacionamiento,
                     paymentLink: paymentLink,
-                    tarifaHora: parsedTarifa,
                     telefono: telefono,
                     esSotano: esSotano,
-                    inventarioQuimicos: chemicalsInventory,
                     paquetesDisponibles: packagesList
                 }, { merge: true });
                 
-                tarifaHora = parsedTarifa;
                 updateMetrics();
                 alert("Configuración de negocio guardada exitosamente.");
             } catch (err) {
@@ -893,13 +845,13 @@
             let deliveredCount = 0;
 
             allTickets.forEach(t => {
-                let price = tarifaHora;
-                if (t.createdAt && t.updatedAt) {
+                let price = t.paqueteSeleccionado?.precio || t.price || 80;
+                if (t.createdAt && t.updatedAt && !t.paqueteSeleccionado) {
                     const entry = t.createdAt.toDate();
                     const exit = t.updatedAt.toDate();
                     const diffMins = Math.floor((exit - entry) / 60000);
                     const hours = Math.max(1, Math.ceil(diffMins / 60));
-                    price = hours * tarifaHora;
+                    price = hours * 80;
                 }
 
                 if (t.status === 'pagado' || t.status === 'entregado') {
@@ -1045,6 +997,89 @@
 
             if (count === 0) {
                 photosContainer.innerHTML = '<div style="grid-column: span 5; text-align: center; color: var(--text-secondary); padding: 20px 0;">No se registraron fotos para este vehículo.</div>';
+            }
+
+            // Configurar botones de acción en el modal
+            const btnCharge = document.getElementById('btn-modal-charge');
+            const btnDeliver = document.getElementById('btn-modal-deliver');
+            const actionsContainer = document.getElementById('modal-actions-container');
+
+            if (ticket.status === 'entregado') {
+                actionsContainer.parentElement.style.display = 'none';
+            } else {
+                actionsContainer.parentElement.style.display = 'block';
+                
+                // Botón Cobrar / Validar Pago
+                if (ticket.status === 'estacionado') {
+                    btnCharge.style.display = 'inline-block';
+                    btnCharge.textContent = 'Validar Pago';
+                    btnCharge.onclick = async () => {
+                        if (confirm(`¿Confirmas que deseas validar el pago de $${(ticket.paqueteSeleccionado?.precio || ticket.price || 80)} MXN para el auto ${ticket.plate}?`)) {
+                            const spinner = document.getElementById('loading-spinner');
+                            spinner.style.display = 'flex';
+                            try {
+                                await updateDoc(doc(db, 'servicios', ticket.id), {
+                                    status: 'pagado',
+                                    metodoPago: 'digital',
+                                    updatedAt: serverTimestamp()
+                                });
+                                alert('Pago validado exitosamente.');
+                                modalDetalle.style.display = 'none';
+                            } catch (err) {
+                                console.error('Error al validar pago desde modal:', err);
+                                alert('Error al actualizar el estado de pago.');
+                            } finally {
+                                spinner.style.display = 'none';
+                            }
+                        }
+                    };
+                } else if (ticket.status === 'solicitado') {
+                    btnCharge.style.display = 'inline-block';
+                    btnCharge.textContent = 'Confirmar Pago Efectivo';
+                    btnCharge.onclick = async () => {
+                        if (confirm(`¿Confirmas que recibiste el pago en efectivo de $${(ticket.paqueteSeleccionado?.precio || ticket.price || 80)} MXN para el auto ${ticket.plate}?`)) {
+                            const spinner = document.getElementById('loading-spinner');
+                            spinner.style.display = 'flex';
+                            try {
+                                await updateDoc(doc(db, 'servicios', ticket.id), {
+                                    status: 'pagado',
+                                    metodoPago: 'efectivo',
+                                    updatedAt: serverTimestamp()
+                                });
+                                alert('Pago en efectivo registrado.');
+                                modalDetalle.style.display = 'none';
+                            } catch (err) {
+                                console.error('Error al registrar pago en efectivo desde modal:', err);
+                                alert('Error al registrar el pago.');
+                            } finally {
+                                spinner.style.display = 'none';
+                            }
+                        }
+                    };
+                } else {
+                    btnCharge.style.display = 'none';
+                }
+
+                // Botón Entregar Auto
+                btnDeliver.onclick = async () => {
+                    if (confirm(`¿Confirmas la entrega definitiva del vehículo ${ticket.plate}?`)) {
+                        const spinner = document.getElementById('loading-spinner');
+                        spinner.style.display = 'flex';
+                        try {
+                            await updateDoc(doc(db, 'servicios', ticket.id), {
+                                status: 'entregado',
+                                updatedAt: serverTimestamp()
+                            });
+                            alert('Vehículo entregado exitosamente.');
+                            modalDetalle.style.display = 'none';
+                        } catch (err) {
+                            console.error('Error al entregar vehículo desde modal:', err);
+                            alert('Error al realizar la entrega.');
+                        } finally {
+                            spinner.style.display = 'none';
+                        }
+                    }
+                };
             }
 
             modalDetalle.style.display = 'flex';
