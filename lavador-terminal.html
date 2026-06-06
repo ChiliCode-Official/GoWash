@@ -454,9 +454,15 @@
 
         <!-- Sección de Tickets Activos -->
         <section>
-            <div class="tickets-section-title">
+            <div class="tickets-section-title" style="margin-bottom: 12px;">
                 <h2>Vehículos Activos</h2>
                 <span style="font-size: 0.9rem; color: var(--text-secondary);" id="active-count">0 autos</span>
+            </div>
+
+            <!-- Buscador en la Terminal -->
+            <div class="search-container" style="position: relative; margin-bottom: 20px; width: 100%;">
+                <span class="search-icon" style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--text-secondary); font-size: 1rem;">🔍</span>
+                <input type="text" id="terminal-search" class="search-input" placeholder="Buscar por placas o modelo..." style="width: 100%; padding: 12px 16px 12px 40px; background: rgba(0, 0, 0, 0.02); border: 1px solid var(--border-color); border-radius: 12px; color: var(--text-primary); font-family: var(--font-body); transition: var(--transition-smooth);">
             </div>
             
             <!-- Lista de tickets en tiempo real -->
@@ -1136,28 +1142,36 @@
             where("negocioId", "==", negocio)
         );
 
+        let activeDocsCache = [];
+
+        // Search trigger binding
+        document.getElementById('terminal-search').addEventListener('input', () => {
+            renderActiveTicketsList();
+        });
+
         onSnapshot(qActiveTickets, (snapshot) => {
-            const ticketsList = document.getElementById('active-tickets-list');
-            const activeCount = document.getElementById('active-count');
-            
-            ticketsList.innerHTML = '';
-            
-            const activeDocs = snapshot.docs.filter(doc => doc.data().status !== 'entregado');
-            const count = activeDocs.length;
+            activeDocsCache = snapshot.docs.filter(doc => doc.data().status !== 'entregado');
 
-            if (count === 0) {
-                ticketsList.innerHTML = `
-                    <div style="text-align: center; padding: 40px 0; color: var(--text-secondary);">
-                        Cero vehículos activos en el autolavado.
-                    </div>`;
-                activeCount.textContent = '0 autos';
-                isFirstLoad = false;
-                
-                Object.keys(existingTickets).forEach(key => delete existingTickets[key]);
-                return;
-            }
+            // Ordenar desc por actualización
+            const getPriority = (data) => {
+                if (data.status === 'pagado') return 3;
+                if (data.status === 'solicitado') return 2;
+                return 1;
+            };
 
-            activeDocs.forEach(docSnap => {
+            activeDocsCache.sort((a, b) => {
+                const priorityA = getPriority(a.data());
+                const priorityB = getPriority(b.data());
+                if (priorityA !== priorityB) {
+                    return priorityB - priorityA;
+                }
+                const dateA = a.data().updatedAt?.toDate() || a.data().createdAt?.toDate() || new Date(0);
+                const dateB = b.data().updatedAt?.toDate() || b.data().createdAt?.toDate() || new Date(0);
+                return dateB - dateA;
+            });
+
+            // Enviar notificaciones de alertas nuevas
+            activeDocsCache.forEach(docSnap => {
                 const id = docSnap.id;
                 const data = docSnap.data();
                 const prevData = existingTickets[id];
@@ -1172,7 +1186,7 @@
                 existingTickets[id] = data;
             });
 
-            const currentActiveIds = new Set(activeDocs.map(d => d.id));
+            const currentActiveIds = new Set(activeDocsCache.map(d => d.id));
             Object.keys(existingTickets).forEach(id => {
                 if (!currentActiveIds.has(id)) {
                     delete existingTickets[id];
@@ -1180,25 +1194,45 @@
             });
 
             isFirstLoad = false;
+            
+            renderActiveTicketsList();
 
-            const getPriority = (data) => {
-                if (data.status === 'pagado') return 3;
-                if (data.status === 'solicitado') return 2;
-                return 1;
-            };
+        }, (err) => {
+            console.error("Firestore onSnapshot error:", err);
+            const ticketsList = document.getElementById('active-tickets-list');
+            ticketsList.innerHTML = `
+                <div style="text-align: center; padding: 40px 0; color: var(--danger);">
+                    Error al sincronizar datos en vivo. Por favor configura firebase-config.js.
+                </div>`;
+        });
 
-            const sortedDocs = activeDocs.sort((a, b) => {
-                const priorityA = getPriority(a.data());
-                const priorityB = getPriority(b.data());
-                if (priorityA !== priorityB) {
-                    return priorityB - priorityA;
-                }
-                const dateA = a.data().updatedAt?.toDate() || a.data().createdAt?.toDate() || new Date(0);
-                const dateB = b.data().updatedAt?.toDate() || b.data().createdAt?.toDate() || new Date(0);
-                return dateB - dateA;
+        function renderActiveTicketsList() {
+            const ticketsList = document.getElementById('active-tickets-list');
+            const activeCount = document.getElementById('active-count');
+            const searchVal = document.getElementById('terminal-search').value.trim().toLowerCase();
+
+            ticketsList.innerHTML = '';
+
+            // Filtrar cache según el buscador
+            const filteredDocs = activeDocsCache.filter(docSnap => {
+                const data = docSnap.data();
+                const plateMatch = data.plate ? data.plate.toLowerCase().includes(searchVal) : false;
+                const modelMatch = data.modeloAuto ? data.modeloAuto.toLowerCase().includes(searchVal) : false;
+                const brandMatch = data.brand ? data.brand.toLowerCase().includes(searchVal) : false;
+                const packageMatch = data.tipoLavado ? data.tipoLavado.toLowerCase().includes(searchVal) : false;
+                return searchVal === "" || plateMatch || modelMatch || brandMatch || packageMatch;
             });
 
-            sortedDocs.forEach(ticketDoc => {
+            if (filteredDocs.length === 0) {
+                ticketsList.innerHTML = `
+                    <div style="text-align: center; padding: 40px 0; color: var(--text-secondary);">
+                        No se encontraron vehículos activos.
+                    </div>`;
+                activeCount.textContent = '0 autos';
+                return;
+            }
+
+            filteredDocs.forEach(ticketDoc => {
                 const ticketId = ticketDoc.id;
                 const data = ticketDoc.data();
                 
@@ -1228,6 +1262,12 @@
                     validationButton = `
                         <button class="btn btn-secondary btn-validate-digital" data-id="${ticketId}" style="padding: 8px 12px; font-size: 0.8rem; border-color: var(--primary); color: var(--primary);">
                             Validar Pago
+                        </button>
+                    `;
+                } else if (data.status === 'solicitado' && data.metodoPago === 'efectivo') {
+                    validationButton = `
+                        <button class="btn btn-secondary btn-validate-cash" data-id="${ticketId}" style="padding: 8px 12px; font-size: 0.8rem; border-color: var(--warning); color: var(--warning);">
+                            Cobrar Efectivo
                         </button>
                     `;
                 }
@@ -1265,7 +1305,30 @@
                                 });
                             } catch (err) {
                                 console.error('Error al validar pago:', err);
-                                alert('Error al actualizar el estado del servicio.');
+                                  alert('Error al actualizar el estado del servicio.');
+                            } finally {
+                                showSpinner(false);
+                            }
+                        }
+                    });
+                } else if (data.status === 'solicitado' && data.metodoPago === 'efectivo') {
+                    card.querySelector('.btn-validate-cash').addEventListener('click', async (e) => {
+                        e.stopPropagation();
+                        const valetId = localStorage.getItem('wash_user_id') || 'desconocido';
+                        const valetNombre = localStorage.getItem('wash_user_name') || 'Lavador';
+                        if (confirm(`¿Confirmas que recibiste el pago en efectivo y que fue cobrado por ${valetNombre}?`)) {
+                            showSpinner(true, 'Registrando pago en efectivo...');
+                            try {
+                                await updateDoc(doc(db, 'servicios', ticketId), {
+                                    status: 'pagado',
+                                    cobradoPorId: valetId,
+                                    cobradoPorNombre: valetNombre,
+                                    updatedAt: serverTimestamp()
+                                });
+                                alert('Pago en efectivo registrado correctamente.');
+                            } catch (err) {
+                                console.error('Error al registrar pago en efectivo:', err);
+                                alert('Error al actualizar el servicio.');
                             } finally {
                                 showSpinner(false);
                             }
@@ -1299,7 +1362,7 @@
                 ticketsList.appendChild(card);
             });
 
-            activeCount.textContent = `${count} ${count === 1 ? 'auto' : 'autos'}`;
+            activeCount.textContent = `${filteredDocs.length} ${filteredDocs.length === 1 ? 'auto' : 'autos'}`;
         }, (err) => {
             console.error("Firestore onSnapshot error:", err);
             const ticketsList = document.getElementById('active-tickets-list');
