@@ -14,11 +14,23 @@
         "tarifaHora": { "type": "number", "example": 80, "description": "Precio base del lavado estándar" },
         "telefono": { "type": "string", "example": "+528112345678" },
         "ubicacionUrl": { "type": "string", "format": "uri", "example": "https://maps.app.goo.gl/..." },
+        "linkMaps": { "type": "string", "format": "uri", "example": "https://maps.app.goo.gl/...", "description": "Google Maps share location link for clients" },
         "esSotano": { "type": "boolean", "example": false },
         "inventarioQuimicos": {
           "type": "array",
           "items": { "type": "string" },
           "example": ["Shampoo Espuma Activa", "Cera Carnauba", "Abrillantador de Llantas", "Desengrasante Motor"]
+        },
+        "paquetesDisponibles": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "nombre": { "type": "string" },
+              "precio": { "type": "number" }
+            }
+          },
+          "example": [{"nombre": "Lavado Básico", "precio": 150}, {"nombre": "Polish", "precio": 800}]
         },
         "createdAt": { "type": "timestamp", "description": "Fecha de registro del negocio" }
       }
@@ -46,6 +58,15 @@
         "notes": { "type": "string", "description": "Reporte de daños preexistentes o notas rápidas", "example": "Tallón en defensa trasera derecha y rin delantero izquierdo rayado." },
         "tipoLavado": { "type": "string", "enum": ["basico", "premium", "cerámico"], "example": "basico" },
         "modeloAuto": { "type": "string", "example": "Carrera 911" },
+        "categoriaVehiculo": { "type": "string", "enum": ["moto", "chico", "sedan", "suv", "suv_grande"], "example": "sedan" },
+        "paqueteSeleccionado": {
+          "type": "object",
+          "properties": {
+            "nombre": { "type": "string" },
+            "precio": { "type": "number" }
+          },
+          "example": { "nombre": "Polish", "precio": 800 }
+        },
         "status": {
           "type": "string",
           "enum": ["estacionado", "solicitado", "pagado", "entregado"],

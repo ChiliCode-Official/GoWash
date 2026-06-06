@@ -11,85 +11,164 @@
     <!-- Hojas de estilo -->
     <link rel="stylesheet" href="style.css">
     
-    <!-- Stripe.js SDK -->
-    <script src="https://js.stripe.com/v3/"></script>
-
     <style>
-        .ticket-view-card {
-            padding: 32px 24px;
-            text-align: center;
+        body {
+            background: linear-gradient(135deg, #FDFDFD 0%, #F4F6F9 100%);
+            min-height: 100vh;
+            color: var(--text-primary);
+            position: relative;
+            padding-bottom: 40px;
+        }
+
+        .app-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 24px 16px;
+        }
+
+        .navbar {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            border-radius: 20px;
+            padding: 16px 28px;
+            margin-bottom: 24px;
+            display: flex;
+            justify-content: center;
+            box-shadow: 0 4px 30px rgba(0,0,0,0.02);
+        }
+
+        /* Bento Grid */
+        .bento-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
             margin-top: 20px;
-            animation: card-slide-up 0.5s ease-out;
         }
 
-        @keyframes card-slide-up {
-            from { opacity: 0; transform: translateY(30px); }
-            to { opacity: 1; transform: translateY(0); }
+        .bento-card {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            border-radius: 24px;
+            padding: 28px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.02);
+            transition: var(--transition-smooth);
+            display: flex;
+            flex-direction: column;
         }
 
-        .plate-header {
-            font-size: clamp(1.6rem, 8vw, 2.2rem);
-            font-family: var(--font-title);
-            font-weight: 800;
-            letter-spacing: 0.05em;
-            color: var(--primary);
-            margin-bottom: 8px;
-            border-bottom: 2px dashed var(--border-color);
-            padding-bottom: 12px;
-            display: inline-block;
+        .bento-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 16px 48px rgba(0, 0, 0, 0.04);
+            border-color: rgba(255, 127, 0, 0.2);
+        }
+
+        .bento-card-full {
+            grid-column: span 3;
+        }
+
+        .bento-card-2col {
+            grid-column: span 2;
+        }
+
+        @media (max-width: 900px) {
+            .bento-grid {
+                grid-template-columns: 1fr;
+            }
+            .bento-card-full, .bento-card-2col {
+                grid-column: span 1;
+            }
+        }
+
+        /* Telemetry Card Details */
+        .telemetry-card {
+            align-items: center;
+            text-align: center;
+        }
+
+        .vehicle-image-wrapper {
+            height: 150px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
             width: 100%;
         }
 
-        /* Cronómetro */
-        .timer-container {
-            margin: 24px 0;
-            padding: 16px;
-            background: rgba(0, 0, 0, 0.02);
-            border-radius: 16px;
-            border: 1px solid var(--border-color);
+        .vehicle-image-wrapper img {
+            max-height: 100%;
+            max-width: 100%;
+            object-fit: contain;
+            filter: drop-shadow(0 12px 20px rgba(0,0,0,0.08));
+            animation: float-vehicle 6s ease-in-out infinite;
         }
 
-        .timer-display {
-            font-family: var(--font-title);
-            font-size: clamp(2rem, 10vw, 2.8rem);
-            font-weight: 800;
-            letter-spacing: 0.05em;
-            color: var(--text-primary);
-            line-height: 1;
-            margin-bottom: 6px;
+        @keyframes float-vehicle {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-6px); }
         }
 
-        .timer-label {
-            font-size: 0.8rem;
-            color: var(--text-secondary);
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-        }
-
-        .price-display {
+        .plate-badge-client {
             font-family: var(--font-title);
             font-size: 2rem;
             font-weight: 800;
-            color: var(--primary);
-            margin: 16px 0;
+            letter-spacing: 0.05em;
+            color: var(--text-primary);
+            border: 2px solid var(--text-primary);
+            border-radius: 12px;
+            padding: 6px 18px;
+            display: inline-block;
+            margin-bottom: 12px;
+            background: #FFFFFF;
         }
 
-        /* Carrusel de fotos */
+        .live-status-indicator {
+            font-family: var(--font-title);
+            font-size: 0.9rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            padding: 8px 16px;
+            border-radius: 20px;
+            letter-spacing: 0.05em;
+            margin-bottom: 20px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: currentColor;
+            display: inline-block;
+            animation: pulse-dot 1.5s infinite ease-in-out;
+        }
+
+        @keyframes pulse-dot {
+            0%, 100% { opacity: 0.4; }
+            50% { opacity: 1; }
+        }
+
+        /* Carousel Styles */
         .carousel-container {
-            margin: 24px 0;
             position: relative;
-            border-radius: 16px;
+            border-radius: 18px;
             overflow: hidden;
             border: 1px solid var(--border-color);
-            aspect-ratio: 1.5;
-            background: rgba(0,0,0,0.03);
+            aspect-ratio: 1.6;
+            background: rgba(0,0,0,0.02);
+            margin-top: 10px;
         }
 
         .carousel-slides {
             width: 100%;
             height: 100%;
             display: flex;
-            transition: transform 0.3s ease-in-out;
+            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
         .carousel-slide {
@@ -104,20 +183,6 @@
             object-fit: cover;
         }
 
-        .carousel-slide-label {
-            position: absolute;
-            bottom: 12px;
-            left: 12px;
-            background: rgba(255, 255, 255, 0.9);
-            backdrop-filter: blur(4px);
-            padding: 4px 12px;
-            border-radius: 8px;
-            font-size: 0.75rem;
-            font-weight: 600;
-            color: var(--text-primary);
-            border: 1px solid var(--border-color);
-        }
-
         .carousel-btn {
             position: absolute;
             top: 50%;
@@ -125,9 +190,9 @@
             background: rgba(255, 255, 255, 0.9);
             border: 1px solid var(--border-color);
             color: var(--text-primary);
-            font-size: 1.2rem;
-            width: 44px;
-            height: 44px;
+            font-size: 1rem;
+            width: 38px;
+            height: 38px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -135,132 +200,94 @@
             border-radius: 50%;
             transition: var(--transition-smooth);
             z-index: 10;
-            touch-action: manipulation;
         }
 
-        @media (hover: hover) {
-            .carousel-btn:hover {
-                background: var(--primary);
-                color: white;
-                border-color: var(--primary);
-            }
-        }
-
-        .carousel-btn:active {
-            transform: translateY(-50%) scale(0.9);
-            background: var(--primary-bg);
-            color: var(--primary);
+        .carousel-btn:hover {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
         }
 
         .carousel-btn-prev { left: 12px; }
         .carousel-btn-next { right: 12px; }
 
-        /* Estado del Vehículo */
-        .vehicle-status-banner {
-            padding: 12px;
-            border-radius: 12px;
-            font-weight: 700;
-            margin-bottom: 24px;
-            font-size: 0.95rem;
-            text-transform: uppercase;
-            text-align: center;
-        }
-
-        /* Acciones */
-        .actions-group {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-
-        /* Spinner */
-        .spinner-overlay {
+        /* Mobile Bottom Nav Bar */
+        .bottom-navbar {
             position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
+            bottom: 16px;
+            left: 16px;
+            right: 16px;
             background: rgba(255, 255, 255, 0.85);
-            z-index: 3000;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            border-radius: 20px;
             display: none;
-            align-items: center;
-            justify-content: center;
-            flex-direction: column;
-            gap: 16px;
+            justify-content: space-around;
+            padding: 10px 14px;
+            z-index: 1000;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
         }
-
-        .spinner {
-            width: 50px;
-            height: 50px;
-            border: 5px solid rgba(0,0,0,0.05);
-            border-top: 5px solid var(--primary);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
+        
+        @media (max-width: 768px) {
+            .bottom-navbar {
+                display: flex;
+            }
+            body {
+                padding-bottom: 100px;
+            }
         }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        /* Bento Grid */
-        .bento-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 16px;
-            margin-top: 20px;
-        }
-
-        .bento-card {
-            padding: 24px;
+        
+        .nav-item {
             display: flex;
             flex-direction: column;
+            align-items: center;
+            color: var(--text-secondary);
+            font-size: 0.65rem;
+            text-decoration: none;
+            font-weight: 700;
+            font-family: var(--font-title);
+            gap: 4px;
+            cursor: pointer;
+            transition: var(--transition-smooth);
+            background: none;
+            border: none;
+            outline: none;
+            flex: 1;
+        }
+        
+        .nav-item.active, .nav-item:hover {
+            color: var(--primary);
+        }
+        
+        .nav-item svg {
+            width: 22px;
+            height: 22px;
+            stroke: currentColor;
+            stroke-width: 2;
+            transition: var(--transition-smooth);
+        }
+        .nav-item.active svg, .nav-item:hover svg {
+            transform: scale(1.1);
+        }
+
+        /* Error/Spinner View */
+        .ticket-status-panel {
+            text-align: center;
+            padding: 60px 20px;
+        }
+
+        .telemetry-row {
+            display: flex;
             justify-content: space-between;
             align-items: center;
-            text-align: center;
-            border-radius: 20px;
-            position: relative;
+            border-bottom: 1px solid var(--border-color);
+            padding: 14px 0;
+            width: 100%;
         }
 
-        .bento-card-full {
-            grid-column: span 2;
-        }
-
-        .vehicle-icon-container {
-            margin-bottom: 12px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 80px;
-        }
-
-        .telemetry-label {
-            font-size: 0.75rem;
-            color: var(--text-secondary);
-            text-transform: uppercase;
-            font-weight: 700;
-            letter-spacing: 0.05em;
-        }
-
-        .telemetry-value {
-            font-family: var(--font-title);
-            font-size: 1.25rem;
-            font-weight: 800;
-            color: var(--text-primary);
-        }
-
-        .bento-warning-card {
-            background: rgba(229, 62, 62, 0.08) !important;
-            border: 1px solid rgba(229, 62, 62, 0.25) !important;
-            color: var(--danger);
-            text-align: left;
-            align-items: flex-start;
-        }
-
-        @media (max-width: 600px) {
-            .bento-grid {
-                grid-template-columns: 1fr;
-            }
-            .bento-card-full {
-                grid-column: span 1;
-            }
+        .telemetry-row:last-child {
+            border-bottom: none;
         }
     </style>
 </head>
@@ -273,156 +300,178 @@
     </div>
 
     <!-- Contenedor App -->
-    <div class="app-container" style="max-width: 500px;">
+    <div class="app-container">
         
         <!-- Header -->
-        <header class="navbar glass-panel" style="padding: 12px 20px; margin-bottom: 16px; justify-content: center;">
-            <div class="brand">
-                <img src="https://i.imgur.com/seIwnhu.png" alt="Logo" style="height: 32px;">
-                <span class="brand-name" id="ticket-brand-name" style="font-size: 1.2rem;">GOWASH TICKET</span>
+        <header class="navbar">
+            <div class="brand" style="display: flex; align-items: center; gap: 10px;">
+                <img src="https://i.imgur.com/seIwnhu.png" alt="Logo" style="height: 36px;">
+                <span class="brand-name" id="ticket-brand-name" style="font-family: var(--font-title); font-weight: 800; font-size: 1.25rem; color: var(--text-primary);">GOWASH TICKET</span>
             </div>
         </header>
 
-        <!-- Ticket Card Principal Overhaul (Bento Layout) -->
-        <div id="ticket-content" style="display: none; margin-top: 20px;">
-            <!-- Header Card (Plate and Status) -->
-            <div class="glass-panel bento-card bento-card-full" style="padding: 20px 24px; flex-direction: row; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
-                <div style="text-align: left;">
-                    <div style="font-size: 0.75rem; color: var(--text-secondary); font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">Boleto Digital</div>
-                    <div class="plate-header" id="plate-display" style="border-bottom: none; margin-bottom: 0; padding-bottom: 0; font-size: 2rem; display: inline; width: auto;">AAA123A</div>
-                    <div id="brand-model-display" style="font-size: 1rem; color: var(--text-secondary); font-weight: 600; margin-top: 4px; display: none;"></div>
-                </div>
-                <div id="status-banner" class="vehicle-status-banner" style="margin-bottom: 0; padding: 8px 16px; border-radius: 10px;">
-                    Cargando estado...
-                </div>
-            </div>
-
+        <!-- Contenido del Ticket -->
+        <div id="ticket-content" style="display: none;">
             <div class="bento-grid">
-                <!-- Card 1: Bóveda Legal (Full Width inside Bento) -->
-                <div class="glass-panel bento-card bento-card-full" style="align-items: stretch;">
-                    <div style="text-align: left; font-size: 0.75rem; color: var(--text-secondary); font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 12px;">
-                        📸 Bóveda Legal (Inspección de Entrada)
+                
+                <!-- Bento Card 1: Telemetry Card -->
+                <div class="bento-card telemetry-card" id="status-card">
+                    <div class="vehicle-image-wrapper">
+                        <img id="static-vehicle-img" src="https://i.imgur.com/8MUr0pK.png" alt="Vehículo">
                     </div>
-                    <div class="carousel-container" style="margin: 0; aspect-ratio: 1.6;">
-                        <button class="carousel-btn carousel-btn-prev" id="carousel-prev" style="margin: 0;">&lt;</button>
-                        <button class="carousel-btn carousel-btn-next" id="carousel-next" style="margin: 0;">&gt;</button>
+                    
+                    <div class="plate-badge-client" id="plate-display">---</div>
+                    <div id="brand-model-display" style="font-family: var(--font-title); font-weight: 700; color: var(--text-secondary); margin-bottom: 12px; font-size: 1.1rem;"></div>
+                    
+                    <div id="status-banner" class="live-status-indicator">
+                        <span class="status-dot"></span>
+                        <span id="status-text-val">Lavándose</span>
+                    </div>
+
+                    <div class="telemetry-row">
+                        <span style="font-size: 0.8rem; color: var(--text-secondary); font-weight: 700; text-transform: uppercase;">Paquete</span>
+                        <span style="font-family: var(--font-title); font-weight: 800;" id="vehicle-type-display">Básico</span>
+                    </div>
+                    <div class="telemetry-row">
+                        <span style="font-size: 0.8rem; color: var(--text-secondary); font-weight: 700; text-transform: uppercase;">Transcurrido</span>
+                        <span style="font-family: var(--font-title); font-weight: 800; font-size: 1.2rem;" id="chronometer">00:00:00</span>
+                    </div>
+                    <div class="telemetry-row">
+                        <span style="font-size: 0.8rem; color: var(--text-secondary); font-weight: 700; text-transform: uppercase;">Total Estimado</span>
+                        <span style="font-family: var(--font-title); font-weight: 800; font-size: 1.4rem; color: var(--primary);" id="price-display">$0.00 MXN</span>
+                    </div>
+                </div>
+
+                <!-- Bento Card 2: Bóveda Legal (Carousel) -->
+                <div class="bento-card bento-card-2col" id="boveda-card" style="justify-content: space-between;">
+                    <div>
+                        <h3 style="font-family: var(--font-title); font-size: 1.2rem; font-weight: 800; display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
+                            📸 Bóveda Legal (Inspección)
+                        </h3>
+                        <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 16px;">
+                            Visualiza el expediente fotográfico obligatorio capturado por tu lavador al recibir las llaves.
+                        </p>
+                    </div>
+
+                    <div class="carousel-container">
+                        <button class="carousel-btn carousel-btn-prev" id="carousel-prev">&lt;</button>
+                        <button class="carousel-btn carousel-btn-next" id="carousel-next">&gt;</button>
                         <div class="carousel-slides" id="carousel-slides">
-                            <!-- Slides inyectados por JS -->
+                            <!-- Slides generated dynamically -->
                         </div>
                     </div>
                 </div>
 
-                <!-- Card 2: Telemetry & Cost -->
-                <div class="glass-panel bento-card">
-                    <div class="vehicle-icon-container" id="vehicle-icon-wrapper">
-                        <!-- Sparkles/Clean icon for GoWash -->
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="width: 70px; height: 70px; color: var(--primary); filter: drop-shadow(0 0 8px var(--primary-glow));">
-                            <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
-                        </svg>
-                    </div>
+                <!-- Bento Card 3: Action Center -->
+                <div class="bento-card bento-card-2col" id="payment-card" style="gap: 16px;">
+                    <h3 style="font-family: var(--font-title); font-size: 1.2rem; font-weight: 800; margin-bottom: 4px;">
+                        💳 Acciones de Pago y Contacto
+                    </h3>
                     
-                    <div style="width: 100%; display: flex; flex-direction: column; gap: 12px;">
-                        <div>
-                            <div class="telemetry-label">Tipo de Lavado</div>
-                            <div class="telemetry-value" id="vehicle-type-display">Básico</div>
-                        </div>
-                        <div style="border-top: 1px solid var(--border-color); padding-top: 8px;">
-                            <div class="telemetry-label">Tiempo Transcurrido</div>
-                            <div class="telemetry-value" id="chronometer" style="font-size: 1.5rem; color: var(--text-primary); font-weight: 800; margin-top: 2px;">00:00:00</div>
-                        </div>
-                        <div style="border-top: 1px solid var(--border-color); padding-top: 8px;">
-                            <div class="telemetry-label">Total del Servicio</div>
-                            <div class="telemetry-value" id="price-display" style="font-size: 1.6rem; color: var(--primary); font-weight: 800; margin-top: 2px;">$0.00 MXN</div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Card 3: Action Center -->
-                <div class="glass-panel bento-card" style="justify-content: center; gap: 16px;">
-                    <div style="width: 100%;">
-                        <div class="telemetry-label" style="margin-bottom: 8px;">Acciones de Pago</div>
-                        <div class="actions-group" id="actions-group">
-                            <button id="btn-pay-mp" class="btn btn-primary" style="padding: 14px; font-size: 0.95rem; width: 100%;">
-                                💳 [ PAGAR CON MERCADO PAGO ]
+                    <div style="display: flex; flex-direction: column; gap: 12px; flex-grow: 1; justify-content: center;">
+                        <div id="actions-group" style="display: flex; flex-direction: column; gap: 12px;">
+                            <button id="btn-pay-mp" class="btn btn-primary" style="padding: 16px; font-size: 1rem; width: 100%; border-radius: 14px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em;">
+                                Pagar con Mercado Pago
                             </button>
-                            <button id="btn-pay-cash" class="btn btn-secondary" style="padding: 12px; font-size: 0.9rem; border-color: rgba(214, 158, 46, 0.3); width: 100%;">
-                                💵 [ PAGO EN EFECTIVO AL ENTREGAR ]
+                            <button id="btn-pay-cash" class="btn btn-secondary" style="padding: 14px; font-size: 0.9rem; width: 100%; border-radius: 14px; font-weight: 700; text-transform: uppercase;">
+                                Pago en Efectivo al Entregar
                             </button>
                         </div>
-                        
-                        <div id="msg-pago-exitoso" style="display: none; padding: 12px; background: rgba(255, 127, 0, 0.08); border: 1px solid var(--primary); border-radius: 12px; color: var(--primary); font-weight: 600; font-size: 0.85rem; text-align: left;">
-                            ✓ Pago registrado. Tu lavador ya está preparando tu auto para la entrega.
+                        <div id="msg-pago-exitoso" style="display: none; padding: 16px; background: rgba(255, 127, 0, 0.06); border: 1.5px solid var(--primary); border-radius: 16px; color: var(--primary); font-weight: 700; font-size: 0.9rem; text-align: center;">
+                            ✓ Pago Registrado. Tu lavador está preparando tu vehículo para la entrega.
                         </div>
                     </div>
-                    
-                    <p id="checkout-note" style="font-size: 0.75rem; color: var(--text-secondary); line-height: 1.4; text-align: left; width: 100%;">
-                        Muestra la pantalla de 'Pago Exitoso' a tu lavador para recibir tus llaves y tu vehículo.
-                    </p>
-                </div>
 
-                <!-- Card 4: Location & Contact -->
-                <div class="glass-panel bento-card bento-card-full" style="align-items: stretch; gap: 16px; text-align: left;">
-                    <div style="font-size: 0.75rem; color: var(--text-secondary); font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">
-                        📍 Ubicación y Contacto
-                    </div>
-                    
-                    <div style="display: flex; gap: 16px; align-items: center; flex-wrap: wrap;">
-                        <button id="btn-open-map" class="btn btn-secondary" style="flex: 1; min-width: 150px; font-size: 0.9rem; padding: 12px;">
-                            🧭 [ Abrir Mapa ]
+                    <div style="display: flex; gap: 12px; margin-top: 10px;">
+                        <button id="btn-open-map" class="btn btn-secondary" style="flex: 1; padding: 12px; border-radius: 12px; font-size: 0.85rem;">
+                            🧭 Ver en Google Maps
                         </button>
-                        
-                        <div id="valet-phone-wrapper" style="flex: 1; min-width: 150px;">
-                            <a id="btn-call-valet" href="#" class="btn btn-secondary" style="width: 100%; font-size: 0.9rem; padding: 12px; border-color: rgba(229, 62, 62, 0.3); color: var(--danger); display: flex; align-items: center; justify-content: center; text-decoration: none;">
-                                📞 [ Llamar al Autolavado ]
-                            </a>
-                        </div>
-                    </div>
-                    
-                    <div style="border-top: 1px solid var(--border-color); padding-top: 8px;">
-                        <span style="font-size: 0.75rem; color: var(--text-secondary); font-weight: bold;">🚨 ¿Alguna duda o aclaración?</span>
-                        <span style="font-size: 0.75rem; color: var(--text-secondary); display: block; margin-top: 2px;">
-                            Si tienes alguna pregunta sobre tu auto o el estatus del lavado, llama directamente a la oficina de atención.
-                        </span>
+                        <a id="btn-call-valet" href="#" class="btn btn-secondary" style="flex: 1; padding: 12px; border-radius: 12px; font-size: 0.85rem; display: flex; align-items: center; justify-content: center; text-decoration: none; color: var(--text-primary);">
+                            📞 Llamar a Oficina
+                        </a>
                     </div>
                 </div>
 
-                <!-- Card 5: Basement Warning (Sótano) -->
-                <div id="sotano-warning-card" class="glass-panel bento-card bento-card-full bento-warning-card" style="display: none; padding: 20px;">
-                    <h4 style="font-family: var(--font-title); font-weight: 700; font-size: 0.95rem; display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
-                        ⚠️ Advertencia de Conectividad
+                <!-- Bento Card 4: Legal Disclaimers -->
+                <div class="bento-card" id="disclaimers-card" style="gap: 12px; justify-content: center; background: rgba(255, 255, 255, 0.65);">
+                    <h4 style="font-family: var(--font-title); font-size: 0.9rem; font-weight: 800; text-transform: uppercase; color: var(--text-secondary); margin-bottom: 4px;">
+                        🚨 Centro de Soporte y Legal
                     </h4>
-                    <p style="font-size: 0.8rem; color: rgba(229, 62, 62, 0.8); line-height: 1.5; margin: 0;">
-                        El establecimiento reporta señal limitada. Las notificaciones y actualizaciones en vivo de tu lavado podrían demorarse en la red celular.
+                    <p style="font-size: 0.8rem; color: var(--text-secondary); line-height: 1.4; margin: 0;">
+                        <strong>¿Algo salió mal?</strong> Llama al 555-555-5555.
+                    </p>
+                    <p id="sotano-warning-disclaimer" style="font-size: 0.8rem; color: var(--warning); line-height: 1.4; margin: 0; display: none;">
+                        <strong>⚠️ Sótano detectado.</strong> El establecimiento tiene señal limitada; el tiempo y el estatus en vivo pueden tardar en actualizarse.
+                    </p>
+                    <p style="font-size: 0.72rem; color: #888888; line-height: 1.4; margin-top: 8px; border-top: 1px solid var(--border-color); padding-top: 10px;">
+                        Nota: Las imágenes de los vehículos son demostrativas. Las fotos reales de su auto se pueden consultar en la bóveda legal.
                     </p>
                 </div>
+
+                <!-- Bento Card 5: Cómo llegar -->
+                <div class="bento-card" id="navigate-card" style="gap: 12px; justify-content: center; text-align: center; align-items: center;">
+                    <div style="font-size: 2.2rem; color: #FF7F00; filter: drop-shadow(0 4px 10px rgba(255, 127, 0, 0.25)); margin-bottom: 4px;">📍</div>
+                    <h3 style="font-family: var(--font-title); font-size: 1.1rem; font-weight: 800; margin-bottom: 2px;">Cómo llegar</h3>
+                    <div id="navigate-content" style="width: 100%;">
+                        <p id="navigate-status" style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 12px;">Ubicación pendiente de configurar</p>
+                        <a id="btn-navigate-maps" href="#" target="_blank" class="btn btn-primary" style="padding: 10px 20px; font-size: 0.85rem; border-radius: 20px; font-weight: 800; text-transform: uppercase; background: #FF7F00; border-color: #FF7F00; color: #FFFFFF; display: none; width: 100%; box-shadow: 0 4px 12px rgba(255, 127, 0, 0.35); text-decoration: none; justify-content: center; align-items: center;">
+                            Abrir en Google Maps
+                        </a>
+                    </div>
+                </div>
+
             </div>
         </div>
 
-        <!-- Ticket no encontrado o error -->
-        <div class="glass-panel ticket-view-card" id="ticket-error" style="display: none; padding: 40px 24px;">
+        <!-- Ticket no encontrado -->
+        <div class="glass-panel bento-card ticket-status-panel" id="ticket-error" style="display: none;">
             <span style="font-size: 3rem;">⚠️</span>
-            <h2 style="margin-top: 16px; margin-bottom: 8px;">Ticket no encontrado</h2>
-            <p style="color: var(--text-secondary); margin-bottom: 24px;">El ID de servicio proporcionado no existe en nuestro sistema o la URL es incorrecta.</p>
-            <a href="index.html" class="btn btn-secondary" style="width: 100%;">Volver al inicio</a>
+            <h2 style="margin-top: 16px; margin-bottom: 8px; font-family: var(--font-title); font-weight: 800;">Ticket no encontrado</h2>
+            <p style="color: var(--text-secondary); margin-bottom: 24px;">El ID de servicio proporcionado es incorrecto o fue eliminado de la base de datos.</p>
+            <a href="index.html" class="btn btn-secondary" style="width: 100%;">Volver al Inicio</a>
         </div>
 
         <!-- Footer -->
-        <footer style="margin-top: 32px; padding: 20px 0; text-align: center; border-top: 1px solid var(--border-color); display: flex; flex-direction: column; gap: 8px; align-items: center;">
+        <footer style="margin-top: 40px; padding: 20px 0; text-align: center; border-top: 1px solid var(--border-color); display: flex; flex-direction: column; gap: 6px; align-items: center;">
             <p style="font-size: 0.8rem; color: var(--text-secondary);">© 2026 GoWash por Chili Code. Todos los derechos reservados.</p>
-            <div style="font-size: 0.75rem;">
-                <a href="terminos.html" style="color: var(--text-secondary); text-decoration: none; margin: 0 10px;">Términos de Uso</a> | 
-                <a href="privacidad.html" style="color: var(--text-secondary); text-decoration: none; margin: 0 10px;">Aviso de Privacidad</a>
-            </div>
-            <div style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 8px; display: inline-flex; align-items: center; gap: 8px; flex-wrap: wrap;">
-                <span>Una submarca de</span>
-                <a href="https://chilicode-official.github.io/ChiliCode/" target="_blank" style="display: inline-flex; align-items: center; gap: 6px; text-decoration: none; color: var(--text-primary); font-weight: 700;">
-                    <img src="https://i.imgur.com/h3CpChF.png" alt="Chili Code" style="height: 16px; object-fit: contain;">
+            <div style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 4px; display: inline-flex; align-items: center; gap: 6px;">
+                <span>Desarrollado por</span>
+                <a href="https://chilicode-official.github.io/ChiliCode/" target="_blank" style="display: inline-flex; align-items: center; gap: 4px; text-decoration: none; color: var(--text-primary); font-weight: 700;">
+                    <img src="https://i.imgur.com/h3CpChF.png" alt="Chili Code" style="height: 14px;">
                     <span>Chili Code</span>
                 </a>
             </div>
         </footer>
 
     </div>
+
+    <!-- Fixed Bottom Nav Bar on Mobile -->
+    <nav class="bottom-navbar">
+        <button class="nav-item active" id="nav-btn-status">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>
+            </svg>
+            <span>Estado</span>
+        </button>
+        <button class="nav-item" id="nav-btn-pay">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="2" y="5" width="20" height="14" rx="2" ry="2"/><line x1="2" y1="10" x2="22" y2="10"/>
+            </svg>
+            <span>Pago MP</span>
+        </button>
+        <a class="nav-item" id="nav-btn-call" href="tel:555-555-5555">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
+            </svg>
+            <span>Llamar</span>
+        </a>
+        <button class="nav-item" id="nav-btn-photos">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/>
+            </svg>
+            <span>Ver Fotos</span>
+        </button>
+    </nav>
 
     <!-- SCRIPT DE FIREBASE & LÓGICA -->
     <script type="module">
@@ -441,6 +490,15 @@
         const spinner = document.getElementById('loading-spinner');
         const ticketContent = document.getElementById('ticket-content');
         const ticketError = document.getElementById('ticket-error');
+
+        // Image category mapping
+        const categoryPngs = {
+            moto: 'https://i.imgur.com/5fQyMzw.png',
+            chico: 'https://i.imgur.com/YglYTpz.png',
+            sedan: 'https://i.imgur.com/8MUr0pK.png',
+            suv: 'https://i.imgur.com/LGW4Wbt.png',
+            suv_grande: 'https://i.imgur.com/QuY3TBR.png'
+        };
 
         if (!ticketId) {
             ticketError.style.display = 'block';
@@ -485,12 +543,14 @@
                 const brandModelEl = document.getElementById('brand-model-display');
                 if (brandModelEl) {
                     const parts = [data.brand, data.modeloAuto].filter(Boolean);
-                    if (parts.length > 0) {
-                        brandModelEl.textContent = parts.join(' ');
-                        brandModelEl.style.display = 'block';
-                    } else {
-                        brandModelEl.style.display = 'none';
-                    }
+                    brandModelEl.textContent = parts.length > 0 ? parts.join(' ') : 'Vehículo GoWash';
+                }
+
+                // Render category static PNG
+                const category = data.categoriaVehiculo || 'sedan';
+                const staticImgEl = document.getElementById('static-vehicle-img');
+                if (staticImgEl && categoryPngs[category]) {
+                    staticImgEl.src = categoryPngs[category];
                 }
 
                 // Fetch de Configuración de Negocio
@@ -519,35 +579,43 @@
                                 document.documentElement.style.setProperty('--primary-bg', sData.colorAcento + '1a');
                             }
 
-                            const sotanoCard = document.getElementById('sotano-warning-card');
-                            if (sotanoCard) {
-                                sotanoCard.style.display = esSotano ? 'flex' : 'none';
+                            const sotanoWarning = document.getElementById('sotano-warning-disclaimer');
+                            if (sotanoWarning) {
+                                sotanoWarning.style.display = esSotano ? 'block' : 'none';
                             }
 
                             const btnMap = document.getElementById('btn-open-map');
                             if (btnMap) {
                                 if (ubicacionUrl) {
                                     btnMap.disabled = false;
-                                    btnMap.style.opacity = '1';
                                     btnMap.onclick = () => window.open(ubicacionUrl, '_blank');
                                 } else {
                                     btnMap.disabled = true;
-                                    btnMap.style.opacity = '0.5';
                                     btnMap.onclick = null;
                                 }
                             }
 
                             const btnCall = document.getElementById('btn-call-valet');
-                            if (btnCall) {
-                                if (telefonoValet) {
-                                    btnCall.href = `tel:${telefonoValet}`;
-                                    btnCall.style.opacity = '1';
-                                    btnCall.style.pointerEvents = 'auto';
-                                } else {
-                                    btnCall.href = "#";
-                                    btnCall.style.opacity = '0.5';
-                                    btnCall.style.pointerEvents = 'none';
-                                }
+                            const navCall = document.getElementById('nav-btn-call');
+                            if (telefonoValet) {
+                                if (btnCall) btnCall.href = `tel:${telefonoValet}`;
+                                if (navCall) navCall.href = `tel:${telefonoValet}`;
+                            } else {
+                                if (btnCall) btnCall.href = "tel:555-555-5555";
+                                if (navCall) navCall.href = "tel:555-555-5555";
+                            }
+
+                            // Geolocation linkMaps
+                            const linkMaps = sData.linkMaps || null;
+                            const statusText = document.getElementById('navigate-status');
+                            const navigateBtn = document.getElementById('btn-navigate-maps');
+                            if (linkMaps) {
+                                statusText.style.display = 'none';
+                                navigateBtn.href = linkMaps;
+                                navigateBtn.style.display = 'inline-flex';
+                            } else {
+                                statusText.style.display = 'block';
+                                navigateBtn.style.display = 'none';
                             }
                         }
                     }).catch((err) => {
@@ -555,69 +623,49 @@
                     });
                 }
 
-                // Mostrar Tipo de Lavado
-                const tipoLavado = data.tipoLavado || 'basico';
+                // Mostrar Tipo de Lavado / Paquete
+                const packageLabel = data.paqueteSeleccionado?.nombre || data.tipoLavado || 'Básico';
                 const vehicleTypeDisplay = document.getElementById('vehicle-type-display');
-                const vehicleIconWrapper = document.getElementById('vehicle-icon-wrapper');
-                
-                if (tipoLavado === 'cerámico') {
-                    vehicleTypeDisplay.textContent = 'Cerámico ✨';
-                    vehicleIconWrapper.innerHTML = `
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="width: 70px; height: 70px; color: var(--primary); filter: drop-shadow(0 0 8px var(--primary-glow));">
-                            <path d="m12 3-1.912 5.886L4.2 9.25l4.9 3.561L7.19 18.7 12 15l4.81 3.7-1.91-5.889 4.9-3.561-5.89-.364L12 3z"/>
-                        </svg>
-                    `;
-                } else if (tipoLavado === 'premium') {
-                    vehicleTypeDisplay.textContent = 'Premium 🚙';
-                    vehicleIconWrapper.innerHTML = `
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="width: 70px; height: 70px; color: var(--primary); filter: drop-shadow(0 0 8px var(--primary-glow));">
-                            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-                        </svg>
-                    `;
-                } else {
-                    vehicleTypeDisplay.textContent = 'Básico 🚗';
-                    vehicleIconWrapper.innerHTML = `
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="width: 70px; height: 70px; color: var(--primary); filter: drop-shadow(0 0 8px var(--primary-glow));">
-                            <path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9C2 11.2 2 11.6 2 12v4c0 .6.4 1 1 1h2" />
-                            <circle cx="7" cy="17" r="2" />
-                            <path d="M9 17h6" />
-                            <circle cx="17" cy="17" r="2" />
-                        </svg>
-                    `;
+                if (vehicleTypeDisplay) {
+                    vehicleTypeDisplay.textContent = packageLabel.toUpperCase();
                 }
 
                 // Estado Visual del Auto
                 const statusBanner = document.getElementById('status-banner');
+                const statusTextVal = document.getElementById('status-text-val');
                 const actionsGroup = document.getElementById('actions-group');
                 const successMsg = document.getElementById('msg-pago-exitoso');
-                const checkoutNote = document.getElementById('checkout-note');
 
                 if (data.status === 'estacionado') {
-                    statusBanner.className = 'vehicle-status-banner status-estacionado';
-                    statusBanner.textContent = 'Lavándose';
+                    statusBanner.className = 'live-status-indicator status-estacionado';
+                    statusBanner.style.background = 'rgba(255, 127, 0, 0.08)';
+                    statusBanner.style.color = 'var(--primary)';
+                    statusTextVal.textContent = 'LAVADO EN PROCESO';
                     actionsGroup.style.display = 'flex';
                     successMsg.style.display = 'none';
-                    if (checkoutNote) checkoutNote.style.display = 'block';
                 } else if (data.status === 'solicitado') {
-                    statusBanner.className = 'vehicle-status-banner status-solicitado';
-                    statusBanner.textContent = data.metodoPago === 'efectivo' 
-                        ? 'Listo (Por Pagar Efectivo)' 
-                        : 'Lavado Terminado (Listo)';
+                    statusBanner.className = 'live-status-indicator status-solicitado';
+                    statusBanner.style.background = 'rgba(224, 169, 0, 0.08)';
+                    statusBanner.style.color = 'var(--warning)';
+                    statusTextVal.textContent = data.metodoPago === 'efectivo' 
+                        ? 'LISTO (POR PAGAR EFECTIVO)' 
+                        : 'LAVADO TERMINADO';
                     actionsGroup.style.display = 'none';
                     successMsg.style.display = 'none';
-                    if (checkoutNote) checkoutNote.style.display = 'none';
                 } else if (data.status === 'pagado') {
-                    statusBanner.className = 'vehicle-status-banner status-pagado';
-                    statusBanner.textContent = 'Pagado - En Entrega';
+                    statusBanner.className = 'live-status-indicator status-pagado';
+                    statusBanner.style.background = 'rgba(46, 204, 113, 0.08)';
+                    statusBanner.style.color = '#2ecc71';
+                    statusTextVal.textContent = 'PAGADO - EN ENTREGA';
                     actionsGroup.style.display = 'none';
                     successMsg.style.display = 'block';
-                    if (checkoutNote) checkoutNote.style.display = 'none';
                 } else if (data.status === 'entregado') {
-                    statusBanner.className = 'vehicle-status-banner status-estacionado';
-                    statusBanner.textContent = 'Vehículo Entregado';
+                    statusBanner.className = 'live-status-indicator';
+                    statusBanner.style.background = 'rgba(0, 0, 0, 0.05)';
+                    statusBanner.style.color = 'var(--text-secondary)';
+                    statusTextVal.textContent = 'VEHÍCULO ENTREGADO';
                     actionsGroup.style.display = 'none';
                     successMsg.style.display = 'none';
-                    if (checkoutNote) checkoutNote.style.display = 'none';
                     
                     if (cronometerInterval) clearInterval(cronometerInterval);
                     document.getElementById('chronometer').textContent = 'Completado';
@@ -626,17 +674,18 @@
                 // Renderizar carrusel
                 renderCarousel(data.photos);
 
-                // Iniciar Cronómetro
+                // Iniciar Cronómetro y Cálculo de Costo
                 if (data.status !== 'entregado' && data.createdAt) {
                     const entryTime = data.createdAt.toDate();
                     if (cronometerInterval) clearInterval(cronometerInterval);
-                    updateTimerAndPrice(entryTime);
+                    updateTimerAndPrice(entryTime, data);
                     cronometerInterval = setInterval(() => {
-                        updateTimerAndPrice(entryTime);
+                        updateTimerAndPrice(entryTime, data);
                     }, 1000);
                 } else if (!data.createdAt) {
                     document.getElementById('chronometer').textContent = '00:00:00';
-                    document.getElementById('price-display').textContent = `$${tarifaHora.toFixed(2)} MXN`;
+                    const basePrice = data.paqueteSeleccionado?.precio || data.price || tarifaHora || 80;
+                    document.getElementById('price-display').textContent = `$${basePrice.toFixed(2)} MXN`;
                 }
 
                 setupPaymentActions(data);
@@ -664,7 +713,7 @@
                     slide.className = 'carousel-slide';
                     slide.innerHTML = `
                         <img src="${photos[key]}" alt="Foto ${key}">
-                        <div class="carousel-slide-label">${key.toUpperCase()}</div>
+                        <div style="position: absolute; bottom: 12px; left: 12px; background: rgba(255,255,255,0.9); border: 1px solid var(--border-color); padding: 4px 12px; border-radius: 8px; font-size: 0.7rem; font-weight: 700;">${key.toUpperCase()}</div>
                     `;
                     container.appendChild(slide);
                 }
@@ -674,15 +723,15 @@
                 const slide = document.createElement('div');
                 slide.className = 'carousel-slide';
                 slide.innerHTML = `
-                    <div style="display: flex; align-items: center; justify-content: center; height: 100%; color: var(--text-secondary);">
-                        Sin fotos de inspección.
+                    <div style="display: flex; align-items: center; justify-content: center; height: 100%; color: var(--text-secondary); font-size: 0.85rem; padding: 40px 0;">
+                        Fotos de inspección disponibles al ingresar.
                     </div>
                 `;
                 container.appendChild(slide);
             }
         }
 
-        // Navegación
+        // Navegación Carrusel
         const slidesContainer = document.getElementById('carousel-slides');
         document.getElementById('carousel-prev').addEventListener('click', () => {
             const totalSlides = slidesContainer.children.length;
@@ -700,8 +749,8 @@
             }
         });
 
-        // Cronómetro
-        function updateTimerAndPrice(entryDate) {
+        // Cronómetro & Costo
+        function updateTimerAndPrice(entryDate, ticketData) {
             const now = new Date();
             const diffMs = now - entryDate;
             if (diffMs < 0) return;
@@ -714,12 +763,13 @@
             const format = (num) => String(num).padStart(2, '0');
             document.getElementById('chronometer').textContent = `${format(hours)}:${format(minutes)}:${format(seconds)}`;
 
-            // Tarifa calculada por hora o fracción
-            const totalMinutes = Math.floor(diffSecs / 60);
-            const billingHours = Math.max(1, Math.ceil(totalMinutes / 60));
-            const finalPrice = billingHours * tarifaHora;
+            // Fórmula de Costo: price * Math.ceil(time/tarifahora)
+            const packagePrice = ticketData.paqueteSeleccionado?.precio || ticketData.price || tarifaHora || 80;
+            const elapsedMinutes = Math.floor(diffSecs / 60);
+            const hoursMultiplier = Math.max(1, Math.ceil(elapsedMinutes / (tarifaHora || 80)));
+            const estimatedCost = packagePrice * hoursMultiplier;
 
-            document.getElementById('price-display').textContent = `$${finalPrice.toFixed(2)} MXN`;
+            document.getElementById('price-display').textContent = `$${estimatedCost.toFixed(2)} MXN`;
         }
 
         // Acciones de pago
@@ -728,11 +778,7 @@
             const btnCash = document.getElementById('btn-pay-cash');
 
             btnPayMP.onclick = () => {
-                if (paymentLink) {
-                    window.location.href = paymentLink;
-                } else {
-                    alert("Pagos digitales deshabilitados en este establecimiento.");
-                }
+                triggerMPPayment();
             };
 
             btnCash.onclick = async () => {
@@ -753,6 +799,30 @@
                 }
             };
         }
+
+        window.triggerMPPayment = function() {
+            if (paymentLink) {
+                window.location.href = paymentLink;
+            } else {
+                alert("Pagos digitales deshabilitados en este establecimiento.");
+            }
+        };
+
+        window.scrollToElement = function(elementId) {
+            const el = document.getElementById(elementId);
+            if (el) {
+                el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                
+                // update active state of bottom navbar
+                document.querySelectorAll('.nav-item').forEach(btn => btn.classList.remove('active'));
+                if (elementId === 'status-card') document.getElementById('nav-btn-status').classList.add('active');
+                if (elementId === 'boveda-card') document.getElementById('nav-btn-photos').classList.add('active');
+            }
+        };
+
+        document.getElementById('nav-btn-status').onclick = () => scrollToElement('status-card');
+        document.getElementById('nav-btn-pay').onclick = () => triggerMPPayment();
+        document.getElementById('nav-btn-photos').onclick = () => scrollToElement('boveda-card');
     </script>
 </body>
 </html>

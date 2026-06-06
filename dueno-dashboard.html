@@ -435,13 +435,9 @@
                 Define las tarifas, información de contacto y pasarela de pago para este negocio.
             </p>
             <form id="config-form" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px;">
-                <div class="form-group" style="margin-bottom: 0;">
+                <div class="form-group" style="grid-column: span 2; margin-bottom: 0;">
                     <label for="brand-name-input" class="form-label">Nombre Comercial del Autolavado</label>
                     <input type="text" id="brand-name-input" class="form-control" placeholder="Ej. GoWash Monterrey" autocomplete="off">
-                </div>
-                <div class="form-group" style="margin-bottom: 0;">
-                    <label for="color-input" class="form-label">Color de Acento (HEX)</label>
-                    <input type="text" id="color-input" class="form-control" placeholder="#FF7F00" autocomplete="off">
                 </div>
                 <div class="form-group" style="grid-column: span 2; margin-bottom: 0;">
                     <label for="payment-link-input" class="form-label">Link de Cobro Mercado Pago</label>
@@ -454,10 +450,6 @@
                 <div class="form-group" style="margin-bottom: 0;">
                     <label for="phone-input" class="form-label">Teléfono del Negocio</label>
                     <input type="tel" id="phone-input" class="form-control" placeholder="+52 81 1234 5678" autocomplete="off">
-                </div>
-                <div class="form-group" style="grid-column: span 2; margin-bottom: 0;">
-                    <label for="maps-input" class="form-label">URL de Google Maps del Establecimiento</label>
-                    <input type="url" id="maps-input" class="form-control" placeholder="https://maps.app.goo.gl/..." autocomplete="off">
                 </div>
                 <div class="form-group" style="grid-column: span 2; flex-direction: row; align-items: center; gap: 12px; margin-top: 10px; margin-bottom: 0;">
                     <input type="checkbox" id="sotano-checkbox" style="width: 20px; height: 20px; accent-color: var(--primary); cursor: pointer;">
@@ -473,6 +465,28 @@
                     </div>
                     <div id="chem-list-container" style="padding: 12px 16px; border: 1px solid var(--border-color); border-radius: 12px; min-height: 50px; background: rgba(0,0,0,0.01);">
                         <!-- Chemical list generated dynamically -->
+                    </div>
+                </div>
+
+                <!-- Gestión de Paquetes -->
+                <div class="form-group" style="grid-column: span 2; margin-top: 16px; border-top: 1px solid var(--border-color); padding-top: 16px;">
+                    <label class="form-label">📦 Gestión de Paquetes y Servicios</label>
+                    <div style="display: flex; gap: 12px; margin-bottom: 12px;">
+                        <input type="text" id="pkg-name-input" class="form-control" placeholder="Nombre del Paquete (Ej. Lavado Básico)" style="min-height: 40px; padding: 8px 12px; flex: 2;" autocomplete="off">
+                        <input type="number" id="pkg-price-input" class="form-control" placeholder="Precio (MXN)" style="min-height: 40px; padding: 8px 12px; flex: 1;" autocomplete="off">
+                        <button type="button" id="btn-add-pkg" class="btn btn-primary" style="min-height: 40px; padding: 8px 20px; font-size: 0.85rem; font-weight: bold;">+</button>
+                    </div>
+                    <div id="pkg-list-container" style="padding: 12px 16px; border: 1px solid var(--border-color); border-radius: 12px; min-height: 50px; background: rgba(0,0,0,0.01); display: flex; flex-wrap: wrap; gap: 8px;">
+                        <!-- Packages list generated dynamically -->
+                    </div>
+                </div>
+
+                <!-- Ubicación del Negocio -->
+                <div class="form-group" style="grid-column: span 2; margin-top: 16px; border-top: 1px solid var(--border-color); padding-top: 16px;">
+                    <label class="form-label">📍 Ubicación del Negocio</label>
+                    <div style="display: flex; gap: 12px;">
+                        <input type="text" id="maps-share-link" class="form-control" placeholder="Enlace de Google Maps (Compartir ubicación)" style="min-height: 40px; padding: 8px 12px; flex: 1;" autocomplete="off">
+                        <button type="button" id="btn-save-location" class="btn btn-primary" style="min-height: 40px; padding: 8px 20px; font-size: 0.85rem; font-weight: bold;">Guardar Ubicación</button>
                     </div>
                 </div>
 
@@ -570,6 +584,20 @@
                         </table>
                     </div>
                 </div>
+
+                <!-- Rendimiento del Personal (Estadísticas y Gráficas de Lavadores) -->
+                <div style="border-top: 1px solid var(--border-color); padding-top: 24px; margin-top: 8px;">
+                    <h3 style="font-family: var(--font-title); font-size: 1.15rem; margin-bottom: 8px; color: var(--text-primary);">📊 Rendimiento del Personal</h3>
+                    <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 20px;">
+                        Métricas de servicios completados, tiempos promedio de lavado y eficiencia estimada.
+                    </p>
+                    
+                    <div id="washer-stats-container" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px;">
+                        <div style="color: var(--text-secondary); font-style: italic; font-size: 0.9rem;">
+                            Procesando datos de rendimiento...
+                        </div>
+                    </div>
+                </div>
             </div>
         </section>
 
@@ -634,6 +662,7 @@
         // Configuración de Negocio
         let tarifaHora = 80;
         let chemicalsInventory = [];
+        let packagesList = [];
         const negocioDocRef = doc(db, "negocios", negocio);
 
         async function loadNegocioConfig() {
@@ -642,13 +671,6 @@
                 if (docSnap.exists()) {
                     const sData = docSnap.data();
                     if (sData.nombreEstacionamiento) document.getElementById('brand-name-input').value = sData.nombreEstacionamiento;
-                    if (sData.colorAcento) {
-                        document.getElementById('color-input').value = sData.colorAcento;
-                        // Aplicar color de acento
-                        document.documentElement.style.setProperty('--primary', sData.colorAcento);
-                        document.documentElement.style.setProperty('--primary-glow', sData.colorAcento + '59');
-                        document.documentElement.style.setProperty('--primary-bg', sData.colorAcento + '1a');
-                    }
                     if (sData.paymentLink) document.getElementById('payment-link-input').value = sData.paymentLink;
                     if (sData.tarifaHora !== undefined) {
                         tarifaHora = Number(sData.tarifaHora);
@@ -657,12 +679,16 @@
                         document.getElementById('tarifa-input').value = 80;
                     }
                     if (sData.telefono) document.getElementById('phone-input').value = sData.telefono;
-                    if (sData.ubicacionUrl) document.getElementById('maps-input').value = sData.ubicacionUrl;
+                    if (sData.linkMaps) document.getElementById('maps-share-link').value = sData.linkMaps;
                     if (sData.esSotano !== undefined) document.getElementById('sotano-checkbox').checked = sData.esSotano;
                     
                     // Cargar inventario químicos
                     chemicalsInventory = sData.inventarioQuimicos || [];
                     renderChemicalsList();
+
+                    // Cargar paquetes
+                    packagesList = sData.paquetesDisponibles || [];
+                    renderPackagesList();
                 } else {
                     document.getElementById('tarifa-input').value = 80;
                 }
@@ -703,20 +729,67 @@
             }
         };
 
+        // Control y Render de Paquetes
+        function renderPackagesList() {
+            const container = document.getElementById('pkg-list-container');
+            container.innerHTML = '';
+            if (packagesList.length === 0) {
+                container.innerHTML = '<span style="color: var(--text-secondary); font-size: 0.85rem;">Ningún paquete registrado.</span>';
+                return;
+            }
+            packagesList.forEach((pkg, idx) => {
+                const tag = document.createElement('span');
+                tag.className = 'chem-tag';
+                tag.innerHTML = `${pkg.nombre} - $${pkg.precio} MXN <button type="button" data-index="${idx}">&times;</button>`;
+                tag.querySelector('button').onclick = (e) => {
+                    const i = Number(e.target.getAttribute('data-index'));
+                    packagesList.splice(i, 1);
+                    renderPackagesList();
+                };
+                container.appendChild(tag);
+            });
+        }
+
+        document.getElementById('btn-add-pkg').onclick = () => {
+            const name = document.getElementById('pkg-name-input').value.trim();
+            const price = document.getElementById('pkg-price-input').value.trim();
+            if (name && price !== "" && !isNaN(price) && Number(price) >= 0) {
+                if (!packagesList.some(p => p.nombre.toLowerCase() === name.toLowerCase())) {
+                    packagesList.push({ nombre: name, precio: Number(price) });
+                    document.getElementById('pkg-name-input').value = '';
+                    document.getElementById('pkg-price-input').value = '';
+                    renderPackagesList();
+                } else {
+                    alert("Ya existe un paquete con ese nombre.");
+                }
+            } else {
+                alert("Por favor ingresa un nombre y precio válidos.");
+            }
+        };
+
+        // Guardar Ubicación de Google Maps
+        document.getElementById('btn-save-location').onclick = async () => {
+            const linkMaps = document.getElementById('maps-share-link').value.trim();
+            const spinner = document.getElementById('loading-spinner');
+            spinner.style.display = 'flex';
+            try {
+                await setDoc(negocioDocRef, { linkMaps: linkMaps }, { merge: true });
+                alert("Ubicación del negocio guardada exitosamente.");
+            } catch (err) {
+                console.error("Error al guardar ubicación:", err);
+                alert("Error al guardar la ubicación.");
+            } finally {
+                spinner.style.display = 'none';
+            }
+        };
+
         // Guardar Configuración
         document.getElementById('btn-save-config').addEventListener('click', async () => {
             const nombreEstacionamiento = document.getElementById('brand-name-input').value.trim();
-            const colorAcento = document.getElementById('color-input').value.trim();
             const paymentLink = document.getElementById('payment-link-input').value.trim();
             const tarifaInput = document.getElementById('tarifa-input').value.trim();
             const telefono = document.getElementById('phone-input').value.trim();
-            const ubicacionUrl = document.getElementById('maps-input').value.trim();
             const esSotano = document.getElementById('sotano-checkbox').checked;
-
-            if (colorAcento !== "" && !/^#[0-9A-Fa-f]{6}$/.test(colorAcento)) {
-                alert("El color de acento debe ser un formato HEX de 6 dígitos válido (ej. #FF7F00).");
-                return;
-            }
 
             if (tarifaInput === "" || isNaN(tarifaInput) || Number(tarifaInput) < 0) {
                 alert("Por favor ingresa una tarifa válida (mayor o igual a 0).");
@@ -730,20 +803,13 @@
             try {
                 await setDoc(negocioDocRef, {
                     nombreEstacionamiento: nombreEstacionamiento,
-                    colorAcento: colorAcento,
                     paymentLink: paymentLink,
                     tarifaHora: parsedTarifa,
                     telefono: telefono,
-                    ubicacionUrl: ubicacionUrl,
                     esSotano: esSotano,
-                    inventarioQuimicos: chemicalsInventory
+                    inventarioQuimicos: chemicalsInventory,
+                    paquetesDisponibles: packagesList
                 }, { merge: true });
-                
-                if (colorAcento) {
-                    document.documentElement.style.setProperty('--primary', colorAcento);
-                    document.documentElement.style.setProperty('--primary-glow', colorAcento + '59');
-                    document.documentElement.style.setProperty('--primary-bg', colorAcento + '1a');
-                }
                 
                 tarifaHora = parsedTarifa;
                 updateMetrics();
@@ -765,6 +831,7 @@
         // Buscador de Placas
         const searchInput = document.getElementById('vault-search');
         let allTickets = [];
+        let allWorkers = [];
 
         searchInput.addEventListener('input', () => {
             filterAndRenderTable();
@@ -805,6 +872,7 @@
 
             updateMetrics();
             filterAndRenderTable();
+            renderWasherStats();
 
         }, (err) => {
             console.error("Dashboard subscription error:", err);
@@ -991,6 +1059,7 @@
 
         onSnapshot(qValets, (snapshot) => {
             valetsTableBody.innerHTML = '';
+            allWorkers = [];
             
             if (snapshot.empty) {
                 valetsTableBody.innerHTML = `
@@ -999,6 +1068,7 @@
                             No hay trabajadores registrados.
                         </td>
                     </tr>`;
+                renderWasherStats();
                 return;
             }
 
@@ -1006,6 +1076,8 @@
                 const uData = userDoc.data();
                 const uId = userDoc.id;
                 
+                allWorkers.push({ id: uId, ...uData });
+
                 const row = document.createElement('tr');
                 row.style.borderBottom = '1px solid var(--border-color)';
                 
@@ -1047,7 +1119,101 @@
                     }
                 };
             });
+
+            renderWasherStats();
         });
+
+        // Calcular y renderizar rendimiento de lavadores
+        function renderWasherStats() {
+            const container = document.getElementById('washer-stats-container');
+            container.innerHTML = '';
+
+            const lavadores = allWorkers.filter(w => w.rol === 'lavador');
+
+            if (lavadores.length === 0) {
+                container.innerHTML = '<div style="color: var(--text-secondary); font-style: italic; font-size: 0.9rem;">Agrega lavadores para ver sus métricas de rendimiento aquí.</div>';
+                return;
+            }
+
+            // Calcular métricas para cada lavador
+            lavadores.forEach(lavador => {
+                // Filtrar tickets correspondientes a este lavador
+                const ticketsLavador = allTickets.filter(t => t.lavadorId === lavador.id || (t.lavadorNombre && t.lavadorNombre.toLowerCase() === lavador.nombre.toLowerCase()));
+                
+                const completedTickets = ticketsLavador.filter(t => t.status === 'entregado' || t.status === 'pagado');
+                const completedCount = completedTickets.length;
+
+                // Calcular tiempo promedio
+                let totalTimeMins = 0;
+                let validTimeCount = 0;
+
+                completedTickets.forEach(t => {
+                    if (t.createdAt && t.updatedAt) {
+                        const entry = t.createdAt.toDate();
+                        const exit = t.updatedAt.toDate();
+                        const diffMins = Math.floor((exit - entry) / 60000);
+                        if (diffMins > 0 && diffMins < 180) { // filtrar outliers
+                            totalTimeMins += diffMins;
+                            validTimeCount++;
+                        }
+                    }
+                });
+
+                const avgTime = validTimeCount > 0 ? Math.round(totalTimeMins / validTimeCount) : 0;
+                
+                // Calcular Eficiencia (%)
+                // Meta: 20 minutos. Si promedia 20 mins o menos -> 100%. Por cada minuto extra se descuenta 0.8% hasta un mínimo de 50%.
+                let efficiency = 100;
+                if (avgTime > 0) {
+                    efficiency = Math.max(50, Math.min(100, Math.round(100 - (avgTime - 20) * 0.8)));
+                } else {
+                    efficiency = 0; // Sin datos aún
+                }
+
+                // Generar tarjeta Bento de estadísticas
+                const card = document.createElement('div');
+                card.style.background = 'rgba(0, 0, 0, 0.01)';
+                card.style.border = '1px solid var(--border-color)';
+                card.style.borderRadius = '16px';
+                card.style.padding = '20px';
+                card.style.display = 'flex';
+                card.style.flexDirection = 'column';
+                card.style.gap = '12px';
+
+                // Determinar color de eficiencia
+                let effColor = 'var(--text-secondary)';
+                if (efficiency >= 85) effColor = 'var(--primary)';
+                else if (efficiency >= 70) effColor = 'var(--warning)';
+                else if (efficiency > 0) effColor = 'var(--danger)';
+
+                const displayAvgTime = avgTime > 0 ? `${avgTime} min` : 'N/A';
+                const displayEff = efficiency > 0 ? `${efficiency}%` : 'N/A';
+
+                card.innerHTML = `
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <h4 style="font-family: var(--font-title); font-size: 1.1rem; font-weight: 700; color: var(--text-primary);">${lavador.nombre}</h4>
+                        <span style="font-weight: 800; font-size: 1rem; color: ${effColor};">${displayEff}</span>
+                    </div>
+                    
+                    <div style="display: flex; justify-content: space-between; font-size: 0.85rem; color: var(--text-secondary);">
+                        <span>Servicios Completados:</span>
+                        <span style="font-weight: 700; color: var(--text-primary);">${completedCount}</span>
+                    </div>
+
+                    <div style="display: flex; justify-content: space-between; font-size: 0.85rem; color: var(--text-secondary);">
+                        <span>Tiempo Promedio:</span>
+                        <span style="font-weight: 700; color: var(--text-primary);">${displayAvgTime}</span>
+                    </div>
+
+                    <!-- Gráfica de Barra de Eficiencia -->
+                    <div style="width: 100%; height: 8px; background: rgba(0,0,0,0.05); border-radius: 4px; overflow: hidden; margin-top: 4px;">
+                        <div style="width: ${efficiency}%; height: 100%; background: ${effColor}; border-radius: 4px; transition: width 0.5s ease-in-out;"></div>
+                    </div>
+                `;
+
+                container.appendChild(card);
+            });
+        }
 
         // Registro de Nuevo Lavador
         document.getElementById('add-valet-form').addEventListener('submit', async (e) => {

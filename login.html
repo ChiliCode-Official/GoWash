@@ -161,6 +161,8 @@
                 localStorage.setItem('wash_negocio', userData.negocioId);
                 localStorage.setItem('wash_role', userData.rol);
                 localStorage.setItem('wash_session', 'active');
+                localStorage.setItem('wash_user_id', userDoc.id);
+                localStorage.setItem('wash_user_name', userData.nombre || 'Lavador');
                 
                 // Redireccionar según rol adaptado
                 if (userData.rol === 'dueno') {

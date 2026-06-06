@@ -376,6 +376,43 @@
             padding: 4px;
             line-height: 1;
         }
+
+        /* Active styling for multi-step bento cards */
+        .bento-category-card.active {
+            border-color: var(--primary) !important;
+            background: var(--primary) !important;
+            box-shadow: 0 8px 24px var(--primary-glow) !important;
+        }
+        .bento-category-card.active .category-label {
+            color: #FFFFFF !important;
+        }
+        
+        .pkg-select-btn {
+            background: rgba(255, 127, 0, 0.08);
+            border: 1.5px solid rgba(255, 127, 0, 0.15);
+            color: var(--text-primary);
+            padding: 16px;
+            border-radius: 12px;
+            font-family: var(--font-title);
+            font-weight: 700;
+            cursor: pointer;
+            text-align: left;
+            transition: var(--transition-smooth);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+        }
+        .pkg-select-btn:hover {
+            border-color: var(--primary);
+            background: rgba(255, 127, 0, 0.12);
+        }
+        .pkg-select-btn.active {
+            background: var(--primary) !important;
+            border-color: var(--primary) !important;
+            color: #FFFFFF !important;
+            box-shadow: 0 6px 20px var(--primary-glow) !important;
+        }
     </style>
 </head>
 <body>
@@ -431,96 +468,134 @@
         </section>
     </div>
 
-    <!-- MODAL DE REGISTRO -->
+    <!-- MODAL DE REGISTRO (MULTI-STEP TPT) -->
     <div id="modal-registro" class="modal-overlay">
-        <div class="glass-panel modal-content">
+        <div class="glass-panel modal-content" style="max-width: 600px; width: 100%;">
             <button class="modal-close" id="btn-close-registro">&times;</button>
-            <h2 style="margin-bottom: 24px; font-family: var(--font-title); color: var(--text-primary);">Registrar Vehículo</h2>
+            <h2 id="modal-registro-title" style="margin-bottom: 20px; font-family: var(--font-title); color: var(--text-primary);">Registrar Vehículo: Paso 1 de 3</h2>
             
+            <!-- Step Indicators -->
+            <div id="step-indicators" style="display: flex; gap: 8px; margin-bottom: 20px;">
+                <div class="step-dot active" id="dot-step-1" style="flex: 1; height: 4px; background: var(--primary); border-radius: 2px;"></div>
+                <div class="step-dot" id="dot-step-2" style="flex: 1; height: 4px; background: var(--border-color); border-radius: 2px;"></div>
+                <div class="step-dot" id="dot-step-3" style="flex: 1; height: 4px; background: var(--border-color); border-radius: 2px;"></div>
+            </div>
+
             <form id="registro-form">
-                <div class="form-group">
-                    <label for="plate-input" class="form-label">Placas (Obligatorio)</label>
-                    <input type="text" id="plate-input" class="form-control" placeholder="E.g. AAA123A" style="text-transform: uppercase;" required autocomplete="off">
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label">Tipo de Lavado</label>
-                    <div style="display: flex; gap: 16px; margin-top: 4px; flex-wrap: wrap;">
-                        <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; font-size: 0.9rem; font-weight: 500;">
-                            <input type="radio" name="tipo-lavado" value="basico" checked style="accent-color: var(--primary); width: 18px; height: 18px; cursor: pointer;">
-                            🚗 Básico
-                        </label>
-                        <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; font-size: 0.9rem; font-weight: 500;">
-                            <input type="radio" name="tipo-lavado" value="premium" style="accent-color: var(--primary); width: 18px; height: 18px; cursor: pointer;">
-                            🚙 Premium
-                        </label>
-                        <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; font-size: 0.9rem; font-weight: 500;">
-                            <input type="radio" name="tipo-lavado" value="cerámico" style="accent-color: var(--primary); width: 18px; height: 18px; cursor: pointer;">
-                            ✨ Cerámico
-                        </label>
+                <!-- STEP 1: VEHICLE CATEGORY -->
+                <div id="reg-step-1" class="registration-step">
+                    <h3 style="font-family: var(--font-title); margin-bottom: 16px; font-size: 1.1rem; color: var(--text-primary);">Categoría del Vehículo</h3>
+                    <div id="category-grid" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 20px;">
+                        <div class="bento-category-card" data-category="moto" style="background: var(--bg-card); border: 2px solid transparent; border-radius: 16px; padding: 16px; text-align: center; cursor: pointer; transition: var(--transition-smooth);">
+                            <img src="https://i.imgur.com/5fQyMzw.png" alt="Moto" style="height: 60px; object-fit: contain; margin-bottom: 8px;">
+                            <div class="category-label" style="font-family: var(--font-title); font-weight: 700; color: #000000; font-size: 0.9rem;">Moto</div>
+                        </div>
+                        <div class="bento-category-card" data-category="chico" style="background: var(--bg-card); border: 2px solid transparent; border-radius: 16px; padding: 16px; text-align: center; cursor: pointer; transition: var(--transition-smooth);">
+                            <img src="https://i.imgur.com/YglYTpz.png" alt="Chico" style="height: 60px; object-fit: contain; margin-bottom: 8px;">
+                            <div class="category-label" style="font-family: var(--font-title); font-weight: 700; color: #000000; font-size: 0.9rem;">Chico</div>
+                        </div>
+                        <div class="bento-category-card" data-category="sedan" style="background: var(--bg-card); border: 2px solid transparent; border-radius: 16px; padding: 16px; text-align: center; cursor: pointer; transition: var(--transition-smooth);">
+                            <img src="https://i.imgur.com/8MUr0pK.png" alt="Sedán" style="height: 60px; object-fit: contain; margin-bottom: 8px;">
+                            <div class="category-label" style="font-family: var(--font-title); font-weight: 700; color: #000000; font-size: 0.9rem;">Sedán</div>
+                        </div>
+                        <div class="bento-category-card" data-category="suv" style="background: var(--bg-card); border: 2px solid transparent; border-radius: 16px; padding: 16px; text-align: center; cursor: pointer; transition: var(--transition-smooth);">
+                            <img src="https://i.imgur.com/LGW4Wbt.png" alt="SUV" style="height: 60px; object-fit: contain; margin-bottom: 8px;">
+                            <div class="category-label" style="font-family: var(--font-title); font-weight: 700; color: #000000; font-size: 0.9rem;">SUV</div>
+                        </div>
+                        <div class="bento-category-card" data-category="suv_grande" style="grid-column: span 2; background: var(--bg-card); border: 2px solid transparent; border-radius: 16px; padding: 16px; text-align: center; cursor: pointer; transition: var(--transition-smooth);">
+                            <img src="https://i.imgur.com/QuY3TBR.png" alt="SUV Grande" style="height: 60px; object-fit: contain; margin-bottom: 8px;">
+                            <div class="category-label" style="font-family: var(--font-title); font-weight: 700; color: #000000; font-size: 0.9rem;">SUV Grande</div>
+                        </div>
+                    </div>
+                    <div style="text-align: right;">
+                        <button type="button" id="btn-next-step-1" class="btn btn-primary" style="padding: 10px 24px;" disabled>Continuar</button>
                     </div>
                 </div>
 
-                <div class="grid-2" style="margin-bottom: 20px; gap: 12px;">
-                    <div class="form-group" style="margin-bottom: 0;">
-                        <label for="brand-input" class="form-label">Marca (Opcional)</label>
-                        <input type="text" id="brand-input" class="form-control" placeholder="E.g. Porsche" autocomplete="off">
+                <!-- STEP 2: SERVICE SELECTION -->
+                <div id="reg-step-2" class="registration-step" style="display: none;">
+                    <h3 style="font-family: var(--font-title); margin-bottom: 16px; font-size: 1.1rem; color: var(--text-primary);">Selecciona el Paquete</h3>
+                    <div id="packages-selector-container" style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px;">
+                        <span style="color: var(--text-secondary); font-size: 0.9rem;">Cargando paquetes configurados...</span>
                     </div>
-                    <div class="form-group" style="margin-bottom: 0;">
-                        <label for="model-input" class="form-label">Modelo del Auto (Opcional)</label>
-                        <input type="text" id="model-input" class="form-control" placeholder="E.g. GT3" autocomplete="off">
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label">Bóveda Legal: 5 Fotos Obligatorias</label>
-                    <div class="camera-grid">
-                        <!-- Frente -->
-                        <div class="camera-slot" data-slot="frente">
-                            <span class="camera-slot-icon">📸</span>
-                            <span class="camera-slot-label">Frente</span>
-                            <input type="file" accept="image/*" capture="environment" class="camera-input">
-                            <img class="camera-preview" style="display: none;">
-                        </div>
-                        <!-- Atrás -->
-                        <div class="camera-slot" data-slot="atras">
-                            <span class="camera-slot-icon">📸</span>
-                            <span class="camera-slot-label">Atrás</span>
-                            <input type="file" accept="image/*" capture="environment" class="camera-input">
-                            <img class="camera-preview" style="display: none;">
-                        </div>
-                        <!-- Izq -->
-                        <div class="camera-slot" data-slot="izq">
-                            <span class="camera-slot-icon">📸</span>
-                            <span class="camera-slot-label">Izq</span>
-                            <input type="file" accept="image/*" capture="environment" class="camera-input">
-                            <img class="camera-preview" style="display: none;">
-                        </div>
-                        <!-- Der -->
-                        <div class="camera-slot" data-slot="der">
-                            <span class="camera-slot-icon">📸</span>
-                            <span class="camera-slot-label">Der</span>
-                            <input type="file" accept="image/*" capture="environment" class="camera-input">
-                            <img class="camera-preview" style="display: none;">
-                        </div>
-                        <!-- Techo -->
-                        <div class="camera-slot" data-slot="techo">
-                            <span class="camera-slot-icon">📸</span>
-                            <span class="camera-slot-label">Techo</span>
-                            <input type="file" accept="image/*" capture="environment" class="camera-input">
-                            <img class="camera-preview" style="display: none;">
-                        </div>
+                    <div style="display: flex; justify-content: space-between; gap: 12px;">
+                        <button type="button" id="btn-prev-step-2" class="btn btn-secondary" style="padding: 10px 24px;">Atrás</button>
+                        <button type="button" id="btn-next-step-2" class="btn btn-primary" style="padding: 10px 24px;" disabled>Continuar</button>
                     </div>
                 </div>
 
-                <div class="form-group" style="margin-bottom: 24px;">
-                    <label for="notes-input" class="form-label">Notas de Inspección / Comentarios</label>
-                    <textarea id="notes-input" class="form-control" rows="2" placeholder="E.g. Golpe leve facia delantera, rayón rin izquierdo."></textarea>
-                </div>
+                <!-- STEP 3: DETAILS & BOVEDA LEGAL -->
+                <div id="reg-step-3" class="registration-step" style="display: none;">
+                    <h3 style="font-family: var(--font-title); margin-bottom: 16px; font-size: 1.1rem; color: var(--text-primary);">Detalles y Bóveda Legal</h3>
+                    <div class="form-group">
+                        <label for="plate-input" class="form-label">Placas (Obligatorio)</label>
+                        <input type="text" id="plate-input" class="form-control" placeholder="E.g. AAA123A" style="text-transform: uppercase;" required autocomplete="off">
+                    </div>
 
-                <button type="submit" id="btn-save-ticket" class="btn btn-primary" style="width: 100%;">
-                    [ GUARDAR Y GENERAR TICKET ]
-                </button>
+                    <div class="grid-2" style="margin-bottom: 20px; gap: 12px;">
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label for="brand-input" class="form-label">Marca (Opcional)</label>
+                            <input type="text" id="brand-input" class="form-control" placeholder="E.g. Porsche" autocomplete="off">
+                        </div>
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label for="model-input" class="form-label">Modelo del Auto (Opcional)</label>
+                            <input type="text" id="model-input" class="form-control" placeholder="E.g. GT3" autocomplete="off">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Bóveda Legal: 5 Fotos Obligatorias</label>
+                        <div class="camera-grid">
+                            <!-- Frente -->
+                            <div class="camera-slot" data-slot="frente">
+                                <span class="camera-slot-icon">📸</span>
+                                <span class="camera-slot-label">Frente</span>
+                                <input type="file" accept="image/*" capture="environment" class="camera-input">
+                                <img class="camera-preview" style="display: none;">
+                            </div>
+                            <!-- Atrás -->
+                            <div class="camera-slot" data-slot="atras">
+                                <span class="camera-slot-icon">📸</span>
+                                <span class="camera-slot-label">Atrás</span>
+                                <input type="file" accept="image/*" capture="environment" class="camera-input">
+                                <img class="camera-preview" style="display: none;">
+                            </div>
+                            <!-- Izq -->
+                            <div class="camera-slot" data-slot="izq">
+                                <span class="camera-slot-icon">📸</span>
+                                <span class="camera-slot-label">Izq</span>
+                                <input type="file" accept="image/*" capture="environment" class="camera-input">
+                                <img class="camera-preview" style="display: none;">
+                            </div>
+                            <!-- Der -->
+                            <div class="camera-slot" data-slot="der">
+                                <span class="camera-slot-icon">📸</span>
+                                <span class="camera-slot-label">Der</span>
+                                <input type="file" accept="image/*" capture="environment" class="camera-input">
+                                <img class="camera-preview" style="display: none;">
+                            </div>
+                            <!-- Techo -->
+                            <div class="camera-slot" data-slot="techo">
+                                <span class="camera-slot-icon">📸</span>
+                                <span class="camera-slot-label">Techo</span>
+                                <input type="file" accept="image/*" capture="environment" class="camera-input">
+                                <img class="camera-preview" style="display: none;">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group" style="margin-bottom: 24px;">
+                        <label for="notes-input" class="form-label">Notas de Inspección / Comentarios</label>
+                        <textarea id="notes-input" class="form-control" rows="2" placeholder="E.g. Golpe leve facia delantera, rayón rin izquierdo."></textarea>
+                    </div>
+
+                    <div style="display: flex; justify-content: space-between; gap: 12px;">
+                        <button type="button" id="btn-prev-step-3" class="btn btn-secondary" style="padding: 10px 24px;">Atrás</button>
+                        <button type="submit" id="btn-save-ticket" class="btn btn-primary" style="flex: 1;">
+                            [ GUARDAR Y GENERAR TICKET ]
+                        </button>
+                    </div>
+                </div>
             </form>
         </div>
     </div>
@@ -656,11 +731,115 @@
         const modalRegistro = document.getElementById('modal-registro');
         const modalQR = document.getElementById('modal-qr');
         
+        // Modales
+        const modalRegistro = document.getElementById('modal-registro');
+        const modalQR = document.getElementById('modal-qr');
+        
+        let currentStep = 1;
+        let selectedCategory = null;
+        let selectedPackage = null;
+
+        function setStep(step) {
+            currentStep = step;
+            document.getElementById('modal-registro-title').textContent = `Registrar Vehículo: Paso ${step} de 3`;
+            
+            document.querySelectorAll('.registration-step').forEach((el, index) => {
+                el.style.display = (index + 1 === step) ? 'block' : 'none';
+            });
+            
+            // update dots
+            for(let i = 1; i <= 3; i++) {
+                const dot = document.getElementById(`dot-step-${i}`);
+                if (i <= step) {
+                    dot.style.background = 'var(--primary)';
+                } else {
+                    dot.style.background = 'var(--border-color)';
+                }
+            }
+        }
+
         document.getElementById('btn-registrar-trigger').addEventListener('click', () => {
             document.getElementById('registro-form').reset();
             clearCameraSlots();
+            selectedCategory = null;
+            selectedPackage = null;
+            document.querySelectorAll('.bento-category-card').forEach(c => c.classList.remove('active'));
+            document.getElementById('btn-next-step-1').disabled = true;
+            document.getElementById('btn-next-step-2').disabled = true;
+            setStep(1);
             modalRegistro.style.display = 'flex';
         });
+
+        // Step 1: Category selections
+        document.querySelectorAll('.bento-category-card').forEach(card => {
+            card.onclick = () => {
+                document.querySelectorAll('.bento-category-card').forEach(c => c.classList.remove('active'));
+                card.classList.add('active');
+                selectedCategory = card.getAttribute('data-category');
+                document.getElementById('btn-next-step-1').disabled = false;
+            };
+        });
+
+        document.getElementById('btn-next-step-1').onclick = () => {
+            loadPackagesForSelection();
+            setStep(2);
+        };
+        document.getElementById('btn-prev-step-2').onclick = () => {
+            setStep(1);
+        };
+        document.getElementById('btn-next-step-2').onclick = () => {
+            setStep(3);
+        };
+        document.getElementById('btn-prev-step-3').onclick = () => {
+            setStep(2);
+        };
+
+        async function loadPackagesForSelection() {
+            const container = document.getElementById('packages-selector-container');
+            container.innerHTML = '<span style="color: var(--text-secondary); font-size: 0.9rem;">Cargando paquetes...</span>';
+            document.getElementById('btn-next-step-2').disabled = true;
+            selectedPackage = null;
+            
+            try {
+                const docSnap = await getDoc(negocioDocRef);
+                if (docSnap.exists() && docSnap.data().paquetesDisponibles && docSnap.data().paquetesDisponibles.length > 0) {
+                    const pkgs = docSnap.data().paquetesDisponibles;
+                    container.innerHTML = '';
+                    pkgs.forEach(pkg => {
+                        const btn = document.createElement('div');
+                        btn.className = 'pkg-select-btn';
+                        btn.innerHTML = `<span>${pkg.nombre}</span> <span style="color: var(--primary); font-weight: 800;">$${pkg.precio} MXN</span>`;
+                        btn.onclick = () => {
+                            document.querySelectorAll('.pkg-select-btn').forEach(b => b.classList.remove('active'));
+                            btn.classList.add('active');
+                            selectedPackage = pkg;
+                            document.getElementById('btn-next-step-2').disabled = false;
+                        };
+                        container.appendChild(btn);
+                    });
+                } else {
+                    container.innerHTML = '<span style="color: var(--text-secondary); font-size: 0.9rem;">El administrador no ha configurado paquetes. Se usará la Tarifa Base del negocio.</span>';
+                    let baseTariff = 80;
+                    if (docSnap.exists() && docSnap.data().tarifaHora !== undefined) {
+                        baseTariff = Number(docSnap.data().tarifaHora);
+                    }
+                    const fallbackPkg = { nombre: 'Lavado General', precio: baseTariff };
+                    const btn = document.createElement('div');
+                    btn.className = 'pkg-select-btn';
+                    btn.innerHTML = `<span>${fallbackPkg.nombre}</span> <span style="color: var(--primary); font-weight: 800;">$${fallbackPkg.precio} MXN</span>`;
+                    btn.onclick = () => {
+                        document.querySelectorAll('.pkg-select-btn').forEach(b => b.classList.remove('active'));
+                        btn.classList.add('active');
+                        selectedPackage = fallbackPkg;
+                        document.getElementById('btn-next-step-2').disabled = false;
+                    };
+                    container.appendChild(btn);
+                }
+            } catch (err) {
+                console.error("Error fetching packages:", err);
+                container.innerHTML = '<span style="color: var(--danger); font-size: 0.9rem;">Error al cargar los paquetes.</span>';
+            }
+        }
 
         document.getElementById('btn-close-registro').addEventListener('click', () => {
             modalRegistro.style.display = 'none';
@@ -783,7 +962,11 @@
             const brand = document.getElementById('brand-input').value.trim();
             const model = document.getElementById('model-input').value.trim();
             const notes = document.getElementById('notes-input').value.trim();
-            const tipoLavado = document.querySelector('input[name="tipo-lavado"]:checked').value;
+
+            if (!selectedCategory || !selectedPackage) {
+                alert("Por favor completa la categoría y el paquete primero.");
+                return;
+            }
 
             // Exigir fotos
             const missingPhotos = Object.keys(photoData).filter(key => !photoData[key]);
@@ -801,9 +984,13 @@
                     brand: brand || null,
                     modeloAuto: model || null,
                     notes: notes,
-                    tipoLavado: tipoLavado,
+                    categoriaVehiculo: selectedCategory,
+                    paqueteSeleccionado: selectedPackage,
+                    tipoLavado: selectedPackage.nombre,
                     status: 'estacionado',
                     metodoPago: null,
+                    lavadorId: localStorage.getItem('wash_user_id') || 'desconocido',
+                    lavadorNombre: localStorage.getItem('wash_user_name') || 'Lavador',
                     createdAt: serverTimestamp(),
                     updatedAt: serverTimestamp(),
                     photos: {
